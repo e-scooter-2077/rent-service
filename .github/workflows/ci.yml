@@ -1,0 +1,124 @@
+name: Continuous Integration
+
+env:
+  AZURE_APP_SERVICE_NAME: ''
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "**"
+    tags:
+      - "*"
+
+jobs:
+  build:
+    name: Build Microservice
+    runs-on: ubuntu-20.04
+    env:
+      MAIN_PROJECT: src/___MICROSERVICE_NAME___.Web
+      UNIT_TESTS_PROJECT: test/___MICROSERVICE_NAME___.UnitTests
+      OUTPUT_DIR: out
+      DOTNET_VERSION: 5.x
+    outputs:
+      version: ${{ steps.semver.outputs.version }}
+      should-release: ${{ steps.semver.outputs.should-release }}
+      is-prerelease: ${{ steps.semver.outputs.is-github-prerelease }}
+      should-deploy: ${{ env.AZURE_APP_SERVICE_NAME != '' }}
+    steps:
+      - id: semver
+        name: Checkout
+        uses: EasyDesk/action-semver-checkout@v1
+      - name: Build
+        uses: EasyDesk/job-microservice-build@v1
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+          main-project: ${{ env.MAIN_PROJECT }}
+          unit-tests-project: ${{ env.UNIT_TESTS_PROJECT }}
+          output-dir: ${{ env.OUTPUT_DIR }}/app
+          sql-file-name: ${{ env.OUTPUT_DIR }}/update-database.sql
+          warnings-as-errors: false
+      - uses: actions/upload-artifact@v2
+        with:
+          name: build-artifacts
+          path: out
+  deploy-to-test:
+    name: Deploy to test environment
+    runs-on: windows-2019
+    needs: [build]
+    concurrency: deploy-test
+    if: needs.build.outputs.should-deploy == 'true'
+    steps:
+      - uses: actions/download-artifact@v2
+        with:
+          name: build-artifacts
+      - name: Deploy to Azure
+        uses: EasyDesk/job-azure-publish-webapp@v1
+        with:
+          azure-credentials: ${{ secrets.AZURE_CREDENTIALS }}
+          app-name: ${{ env.AZURE_APP_SERVICE_NAME }}
+          publish-dir: app
+          slot-name: test
+          migrations-script: update-database.sql
+          db-server-name: ${{ secrets.TEST_DB_SERVER }}
+          db-connection-string: ${{ secrets.TEST_CONNECTION_STRING }}
+  release:
+    name: GitHub Release
+    runs-on: ubuntu-20.04
+    needs: [build]
+    if: needs.build.outputs.should-release == 'true'
+    concurrency: release
+    steps:
+      - uses: actions/download-artifact@v2
+        with:
+          name: build-artifacts
+      - name: Zip build assets
+        run: zip -r assets app/*
+      - name: Release
+        uses: EasyDesk/action-semver-release@v1
+        with:
+          version: ${{ needs.build.outputs.version }}
+          prerelease: ${{ needs.build.outputs.is-prerelease }}
+          files: |
+            update-database.sql
+            assets.zip
+  deploy-to-ua:
+    name: Deploy to User Acceptance environment
+    runs-on: windows-2019
+    needs: [build, release]
+    concurrency: deploy-ua
+    if: needs.build.outputs.should-deploy == 'true'
+    steps:
+      - uses: actions/download-artifact@v2
+        with:
+          name: build-artifacts
+      - name: Deploy to Azure
+        uses: EasyDesk/job-azure-publish-webapp@v1
+        with:
+          azure-credentials: ${{ secrets.AZURE_CREDENTIALS }}
+          app-name: ${{ env.AZURE_APP_SERVICE_NAME }}
+          publish-dir: app
+          slot-name: ua
+          migrations-script: update-database.sql
+          db-server-name: ${{ secrets.UA_DB_SERVER }}
+          db-connection-string: ${{ secrets.UA_CONNECTION_STRING }}
+  deploy-to-production:
+    name: Deploy to Producion environment
+    runs-on: windows-2019
+    needs: [build, deploy-to-ua]
+    concurrency: deploy-production
+    if: needs.build.outputs.should-deploy == 'true'
+    steps:
+      - uses: actions/download-artifact@v2
+        with:
+          name: build-artifacts
+      - name: Deploy to Azure
+        uses: EasyDesk/job-azure-publish-webapp@v1
+        with:
+          azure-credentials: ${{ secrets.AZURE_CREDENTIALS }}
+          app-name: ${{ env.AZURE_APP_SERVICE_NAME }}
+          publish-dir: app
+          slot-name: production
+          migrations-script: update-database.sql
+          db-server-name: ${{ secrets.PRODUCTION_DB_SERVER }}
+          db-connection-string: ${{ secrets.PRODUCTION_CONNECTION_STRING }}
