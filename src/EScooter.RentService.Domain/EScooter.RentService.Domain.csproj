@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="EasyDesk.CleanArchitecture.Domain" Version="0.12.1" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <RootFolder>..\..</RootFolder>
+  </PropertyGroup>
+
+</Project>

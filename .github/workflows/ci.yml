@@ -16,8 +16,8 @@ jobs:
     name: Build Microservice
     runs-on: ubuntu-20.04
     env:
-      MAIN_PROJECT: src/___MICROSERVICE_NAME___.Web
-      UNIT_TESTS_PROJECT: test/___MICROSERVICE_NAME___.UnitTests
+      MAIN_PROJECT: src/EScooter.RentService.Web
+      UNIT_TESTS_PROJECT: test/EScooter.RentService.UnitTests
       OUTPUT_DIR: out
       DOTNET_VERSION: 5.x
     outputs:
