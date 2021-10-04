@@ -42,26 +42,6 @@ jobs:
         with:
           name: build-artifacts
           path: out
-  deploy-to-test:
-    name: Deploy to test environment
-    runs-on: windows-2019
-    needs: [build]
-    concurrency: deploy-test
-    if: needs.build.outputs.should-deploy == 'true'
-    steps:
-      - uses: actions/download-artifact@v2
-        with:
-          name: build-artifacts
-      - name: Deploy to Azure
-        uses: EasyDesk/job-azure-publish-webapp@v1
-        with:
-          azure-credentials: ${{ secrets.AZURE_CREDENTIALS }}
-          app-name: ${{ env.AZURE_APP_SERVICE_NAME }}
-          publish-dir: app
-          slot-name: test
-          migrations-script: update-database.sql
-          db-server-name: ${{ secrets.TEST_DB_SERVER }}
-          db-connection-string: ${{ secrets.TEST_CONNECTION_STRING }}
   release:
     name: GitHub Release
     runs-on: ubuntu-20.04
@@ -82,30 +62,10 @@ jobs:
           files: |
             update-database.sql
             assets.zip
-  deploy-to-ua:
-    name: Deploy to User Acceptance environment
-    runs-on: windows-2019
-    needs: [build, release]
-    concurrency: deploy-ua
-    if: needs.build.outputs.should-deploy == 'true'
-    steps:
-      - uses: actions/download-artifact@v2
-        with:
-          name: build-artifacts
-      - name: Deploy to Azure
-        uses: EasyDesk/job-azure-publish-webapp@v1
-        with:
-          azure-credentials: ${{ secrets.AZURE_CREDENTIALS }}
-          app-name: ${{ env.AZURE_APP_SERVICE_NAME }}
-          publish-dir: app
-          slot-name: ua
-          migrations-script: update-database.sql
-          db-server-name: ${{ secrets.UA_DB_SERVER }}
-          db-connection-string: ${{ secrets.UA_CONNECTION_STRING }}
-  deploy-to-production:
+  deploy:
     name: Deploy to Producion environment
     runs-on: windows-2019
-    needs: [build, deploy-to-ua]
+    needs: [build, release]
     concurrency: deploy-production
     if: needs.build.outputs.should-deploy == 'true'
     steps:
