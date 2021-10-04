@@ -37,7 +37,7 @@ jobs:
           unit-tests-project: ${{ env.UNIT_TESTS_PROJECT }}
           output-dir: ${{ env.OUTPUT_DIR }}/app
           sql-file-name: ${{ env.OUTPUT_DIR }}/update-database.sql
-          warnings-as-errors: false
+          warnings-as-errors: true
       - uses: actions/upload-artifact@v2
         with:
           name: build-artifacts
