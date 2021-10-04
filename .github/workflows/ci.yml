@@ -80,5 +80,5 @@ jobs:
           publish-dir: app
           slot-name: production
           migrations-script: update-database.sql
-          db-server-name: ${{ secrets.PRODUCTION_DB_SERVER }}
-          db-connection-string: ${{ secrets.PRODUCTION_CONNECTION_STRING }}
+          db-server-name: ${{ secrets.DB_SERVER }}
+          db-connection-string: ${{ secrets.DB_CONNECTION_STRING }}
