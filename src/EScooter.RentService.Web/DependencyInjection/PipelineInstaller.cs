@@ -1,7 +1,7 @@
-﻿using EScooter.RentService.Application;
-using EScooter.RentService.Infrastructure;
+﻿using System;
 using EasyDesk.CleanArchitecture.Web.DependencyInjection;
-using System;
+using EScooter.RentService.Application;
+using EScooter.RentService.Infrastructure;
 
 namespace EScooter.RentService.Web.DependencyInjection
 {
