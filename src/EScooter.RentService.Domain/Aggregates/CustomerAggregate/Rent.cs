@@ -1,6 +1,7 @@
 ﻿using EasyDesk.CleanArchitecture.Domain.Metamodel;
 using EasyDesk.Tools.Options;
 using System;
+using static EasyDesk.Tools.Options.OptionImports;
 
 namespace EScooter.RentService.Domain.Aggregates.CustomerAggregate
 {
@@ -59,5 +60,20 @@ namespace EScooter.RentService.Domain.Aggregates.CustomerAggregate
         /// If empty, this indicates that the rent is still ongoing.
         /// </summary>
         public Option<RentEndInfo> End { get; private set; }
+
+        /// <summary>
+        /// Creates a new <see cref="Rent"/> in the initial state for the scooter with the specified Id.
+        /// </summary>
+        /// <param name="scooterId">The scooter Id.</param>
+        /// <returns>A new <see cref="Rent"/>.</returns>
+        public static Rent CreateForScooter(Guid scooterId)
+        {
+            return new Rent(
+                id: Guid.NewGuid(),
+                scooterId: scooterId,
+                confirmation: None,
+                cancellation: None,
+                end: None);
+        }
     }
 }
