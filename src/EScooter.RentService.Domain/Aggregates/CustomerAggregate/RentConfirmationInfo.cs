@@ -2,5 +2,9 @@
 
 namespace EScooter.RentService.Domain.Aggregates.CustomerAggregate
 {
+    /// <summary>
+    /// Contains information about the confirmation of a rent.
+    /// </summary>
+    /// <param name="Timestamp">The instant in which the confirmation occurred.</param>
     public record RentConfirmationInfo(Timestamp Timestamp);
 }
