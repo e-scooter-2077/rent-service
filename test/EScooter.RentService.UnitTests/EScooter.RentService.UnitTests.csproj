@@ -23,6 +23,10 @@
     <ProjectReference Include="..\..\src\EScooter.RentService.Web\EScooter.RentService.Web.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Domain\" />
+  </ItemGroup>
+
   <PropertyGroup>
     <RootFolder>..\..</RootFolder>
   </PropertyGroup>
