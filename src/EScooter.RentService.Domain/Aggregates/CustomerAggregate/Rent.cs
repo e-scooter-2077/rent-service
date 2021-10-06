@@ -1,6 +1,10 @@
 ﻿using EasyDesk.CleanArchitecture.Domain.Metamodel;
+using EasyDesk.CleanArchitecture.Domain.Metamodel.Results;
+using EasyDesk.Tools;
 using EasyDesk.Tools.Options;
+using EasyDesk.Tools.PrimitiveTypes.DateAndTime;
 using System;
+using static EasyDesk.CleanArchitecture.Domain.Metamodel.Results.ResultImports;
 using static EasyDesk.Tools.Options.OptionImports;
 
 namespace EScooter.RentService.Domain.Aggregates.CustomerAggregate
@@ -75,5 +79,48 @@ namespace EScooter.RentService.Domain.Aggregates.CustomerAggregate
                 cancellation: None,
                 end: None);
         }
+
+        /// <summary>
+        /// Confirms this <see cref="Rent"/>, recording its official starting time.
+        /// </summary>
+        /// <param name="timestamp">The confirmation instant.</param>
+        /// <returns>A result that indicates whether the operation was successful.</returns>
+        public Result<Nothing> Confirm(Timestamp timestamp)
+        {
+            return RequirePending()
+                .IfSuccess(_ => Confirmation = new RentConfirmationInfo(timestamp));
+        }
+
+        /// <summary>
+        /// Cancels this <see cref="Rent"/> before it is confirmed, specifying a reason for the cancellation.
+        /// </summary>
+        /// <param name="reason">The reason for the cancellation.</param>
+        /// <returns>A result that indicates whether the operation was successful.</returns>
+        public Result<Nothing> Cancel(RentCancellationReason reason)
+        {
+            return RequirePending()
+                .IfSuccess(_ => Cancellation = new RentCancellationInfo(reason));
+        }
+
+        private Result<Nothing> RequirePending()
+        {
+            return RequireFalse(Cancellation.IsPresent, () => new RentAlreadyCancelled())
+                .Require(_ => RequireFalse(Confirmation.IsPresent, () => new RentAlreadyConfirmed()));
+        }
     }
+
+    /// <summary>
+    /// Represents an error used when an operation is made on a rent that has already been cancelled.
+    /// </summary>
+    public record RentAlreadyCancelled : DomainError;
+
+    /// <summary>
+    /// Represents an error used when an operation is made on a rent that has already been confirmed.
+    /// </summary>
+    public record RentAlreadyConfirmed : DomainError;
+
+    /// <summary>
+    /// Represents an error used when an operation is made on a rent that has already been ended.
+    /// </summary>
+    public record RentAlreadyEnded : DomainError;
 }
