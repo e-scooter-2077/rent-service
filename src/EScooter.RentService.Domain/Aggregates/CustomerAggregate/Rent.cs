@@ -21,20 +21,14 @@ namespace EScooter.RentService.Domain.Aggregates.CustomerAggregate
         /// <param name="id">The rent id.</param>
         /// <param name="scooterId">The scooter id.</param>
         /// <param name="confirmationInfo">The confirmation info, empty if the rent was not confirmed.</param>
-        /// <param name="cancellationInfo">The cancellation info, empty if the rent was not cancelled.</param>
-        /// <param name="endInfo">The info about the end of the rent, empty if the rent is still ongoing.</param>
         public Rent(
             Guid id,
             Guid scooterId,
-            Option<RentConfirmationInfo> confirmationInfo,
-            Option<RentCancellationInfo> cancellationInfo,
-            Option<RentEndInfo> endInfo)
+            Option<RentConfirmationInfo> confirmationInfo)
         {
             Id = id;
             ScooterId = scooterId;
             ConfirmationInfo = confirmationInfo;
-            CancellationInfo = cancellationInfo;
-            EndInfo = endInfo;
         }
 
         /// <summary>
@@ -54,26 +48,9 @@ namespace EScooter.RentService.Domain.Aggregates.CustomerAggregate
         public Option<RentConfirmationInfo> ConfirmationInfo { get; private set; }
 
         /// <summary>
-        /// Information about the cancellation of this rent.
-        /// If empty, this indicates that the rent has not been cancelled.
+        /// Indicates whether this rent has been confirmed.
         /// </summary>
-        public Option<RentCancellationInfo> CancellationInfo { get; private set; }
-
-        /// <summary>
-        /// Information about the end of this rent.
-        /// If empty, this indicates that the rent is still ongoing.
-        /// </summary>
-        public Option<RentEndInfo> EndInfo { get; private set; }
-
-        private bool IsConfirmed => ConfirmationInfo.IsPresent;
-
-        private bool IsCancelled => CancellationInfo.IsPresent;
-
-        private bool IsEnded => EndInfo.IsPresent;
-
-        private bool IsPending => !IsConfirmed && !IsCancelled;
-
-        private bool IsOngoing => IsConfirmed && !IsEnded;
+        public bool IsConfirmed => ConfirmationInfo.IsPresent;
 
         /// <summary>
         /// Creates a new <see cref="Rent"/> in the initial state for the scooter with the specified Id.
@@ -85,68 +62,26 @@ namespace EScooter.RentService.Domain.Aggregates.CustomerAggregate
             return new Rent(
                 id: Guid.NewGuid(),
                 scooterId: scooterId,
-                confirmationInfo: None,
-                cancellationInfo: None,
-                endInfo: None);
+                confirmationInfo: None);
         }
 
         /// <summary>
-        /// Confirms this <see cref="Rent"/>, recording its official starting time.
-        /// This operations fails with a <see cref="RentNotPending"/> error if this rent is not in a Pending state,
-        /// in other words if it is confirmed or cancelled.
+        /// Confirms this <see cref="Rent"/>, marking its actual start time.
+        /// This operations fails with a <see cref="RentAlreadyConfirmed"/> error if this rent has already been confirmed.
         /// </summary>
         /// <param name="timestamp">The confirmation instant.</param>
         /// <returns>A result that indicates whether the operation was successful.</returns>
         public Result<Nothing> Confirm(Timestamp timestamp)
         {
-            return RequirePending()
+            return RequireNotConfirmed()
                 .IfSuccess(_ => ConfirmationInfo = new RentConfirmationInfo(timestamp));
         }
 
-        /// <summary>
-        /// Cancels this <see cref="Rent"/> before it is confirmed, specifying a reason for the cancellation.
-        /// This operations fails with a <see cref="RentNotPending"/> error if this rent is not in a Pending state,
-        /// in other words if it is confirmed or cancelled.
-        /// </summary>
-        /// <param name="reason">The reason for the cancellation.</param>
-        /// <returns>A result that indicates whether the operation was successful.</returns>
-        public Result<Nothing> Cancel(RentCancellationReason reason)
-        {
-            return RequirePending()
-                .IfSuccess(_ => CancellationInfo = new RentCancellationInfo(reason));
-        }
-
-        private Result<Nothing> RequirePending() => RequireTrue(IsPending, () => new RentNotPending());
-
-        /// <summary>
-        /// Ends this <see cref="Rent"/> after it was confirmed, specifying a reason for the ending.
-        /// This operation fails with a <see cref="RentNotOngoing"/> error if this rent is not in an Ongoing state,
-        /// in other words if it is not confirmed or if it has already ended.
-        /// </summary>
-        /// <param name="reason">The reason for ending this rent.</param>
-        /// <param name="timestamp">The ending instant.</param>
-        /// <returns>A result that indicates whether the operation was successful.</returns>
-        public Result<Nothing> End(RentEndReason reason, Timestamp timestamp)
-        {
-            return RequireOngoing()
-                .IfSuccess(_ => EndInfo = new RentEndInfo(reason, timestamp));
-        }
-
-        private Result<Nothing> RequireOngoing()
-        {
-            return RequireTrue(IsOngoing, () => new RentNotOngoing());
-        }
+        private Result<Nothing> RequireNotConfirmed() => RequireFalse(IsConfirmed, () => new RentAlreadyConfirmed());
     }
 
     /// <summary>
-    /// Represents an error used when an operation is made on a rent that was required to be in a
-    /// pending state, but was not.
+    /// Represents an error used when trying to confirm a rent that has already been confirmed.
     /// </summary>
-    public record RentNotPending : DomainError;
-
-    /// <summary>
-    /// Represents an error used when an operation is made on a rent that was required to be in an
-    /// ongoing state, but was not.
-    /// </summary>
-    public record RentNotOngoing : DomainError;
+    public record RentAlreadyConfirmed : DomainError;
 }

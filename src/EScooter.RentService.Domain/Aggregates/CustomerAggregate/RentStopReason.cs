@@ -3,7 +3,7 @@
     /// <summary>
     /// Describes one of the reasons for which a rent can end.
     /// </summary>
-    public enum RentEndReason
+    public enum RentStopReason
     {
         /// <summary>
         /// Indicates that a rent ended by will of the customer.
