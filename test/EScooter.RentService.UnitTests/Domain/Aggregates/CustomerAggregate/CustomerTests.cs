@@ -1,4 +1,6 @@
-﻿using EasyDesk.Tools.PrimitiveTypes.DateAndTime;
+﻿using EasyDesk.CleanArchitecture.Domain.Metamodel.Results;
+using EasyDesk.CleanArchitecture.Testing.Domain;
+using EasyDesk.Tools.PrimitiveTypes.DateAndTime;
 using EScooter.RentService.Domain.Aggregates.CustomerAggregate;
 using Shouldly;
 using System;
@@ -8,18 +10,25 @@ namespace EScooter.RentService.UnitTests.Domain.Aggregates.CustomerAggregate
 {
     public class CustomerTests
     {
-        private const RentCancellationReason CancellationReason = RentCancellationReason.InternalError;
-        private const RentStopReason StopReason = RentStopReason.StoppedByCustomer;
-
         private readonly Customer _sut;
         private readonly Guid _scooterId = Guid.NewGuid();
-        private readonly Timestamp _timestamp1 = Timestamp.Now;
-        private readonly Timestamp _timestamp2 = Timestamp.Now + TimeOffset.FromMinutes(1);
+        private readonly Timestamp _confirmationTimestamp = Timestamp.Now;
+        private readonly Timestamp _stopTimestamp = Timestamp.Now + TimeOffset.FromMinutes(1);
+        private readonly RentCancellationReason _cancellationReason = RentCancellationReason.InternalError;
+        private readonly RentStopReason _stopReason = RentStopReason.StoppedByCustomer;
 
         public CustomerTests()
         {
             _sut = Customer.Create(Guid.NewGuid());
         }
+
+        private Rent RequestRent() => _sut.RequestRent(_scooterId).ReadValue();
+
+        private Result<Rent> ConfirmRent() => _sut.ConfirmOngoingRent(_confirmationTimestamp);
+
+        private Result<Rent> CancelRent() => _sut.CancelOngoingRent(_cancellationReason);
+
+        private Result<Rent> StopRent() => _sut.StopOngoingRent(_stopTimestamp, _stopReason);
 
         [Fact]
         public void Create_ShouldCreateACustomerWithNoActiveRent()
@@ -30,7 +39,7 @@ namespace EScooter.RentService.UnitTests.Domain.Aggregates.CustomerAggregate
         [Fact]
         public void RequestRent_ShouldReturnTheCreatedRent_IfTheCustomerHasNoOngoingRent()
         {
-            _sut.RequestRent(_scooterId).ReadValue().ShouldSatisfyAllConditions(rent =>
+            RequestRent().ShouldSatisfyAllConditions(rent =>
             {
                 rent.ScooterId.ShouldBe(_scooterId);
                 rent.ConfirmationInfo.ShouldBeEmpty();
@@ -40,15 +49,23 @@ namespace EScooter.RentService.UnitTests.Domain.Aggregates.CustomerAggregate
         [Fact]
         public void RequestRent_ShouldStartANewRent_IfTheCustomerHasNoOngoingRent()
         {
-            var rent = _sut.RequestRent(_scooterId).ReadValue();
+            var rent = RequestRent();
 
             _sut.OngoingRent.ShouldContain(rent);
         }
 
         [Fact]
+        public void RequestRent_ShouldEmitAnEvent_IfTheRequestIsSuccessful()
+        {
+            var rent = RequestRent();
+
+            _sut.ShouldHaveEmitted(new RentRequestedEvent(_sut, rent));
+        }
+
+        [Fact]
         public void RequestRent_ShouldFail_IfTheCustomerAlreadyHasAnOngoingRent()
         {
-            _sut.RequestRent(_scooterId);
+            RequestRent();
 
             _sut.RequestRent(Guid.NewGuid()).ShouldBe(new RentAlreadyOngoing());
         }
@@ -56,33 +73,43 @@ namespace EScooter.RentService.UnitTests.Domain.Aggregates.CustomerAggregate
         [Fact]
         public void ConfirmOngoingRent_ShouldReturnTheOngoingRent_IfTheCustomerHasOne()
         {
-            var rent = _sut.RequestRent(_scooterId).ReadValue();
+            var rent = RequestRent();
 
-            _sut.ConfirmOngoingRent(_timestamp1).ShouldBe(rent);
+            ConfirmRent().ShouldBe(rent);
         }
 
         [Fact]
         public void ConfirmOngoingRent_ShouldConfirmTheOngoingRent_IfTheCustomerHasOne()
         {
-            _sut.RequestRent(_scooterId);
+            RequestRent();
 
-            _sut.ConfirmOngoingRent(_timestamp1);
+            ConfirmRent();
 
-            _sut.OngoingRent.Value.ConfirmationInfo.ShouldContain(new RentConfirmationInfo(_timestamp1));
+            _sut.OngoingRent.Value.ConfirmationInfo.ShouldContain(new RentConfirmationInfo(_confirmationTimestamp));
+        }
+
+        [Fact]
+        public void ConfirmOngoingRent_ShouldEmitAnEvent_IfTheConfirmationWasSuccessful()
+        {
+            var rent = RequestRent();
+
+            ConfirmRent();
+
+            _sut.ShouldHaveEmitted(new RentConfirmedEvent(_sut, rent, _confirmationTimestamp));
         }
 
         [Fact]
         public void ConfirmOngoingRent_ShouldFail_IfTheCustomerHasNoOngoingRent()
         {
-            _sut.ConfirmOngoingRent(_timestamp1).ShouldBe(new NoOngoingRent());
+            ConfirmRent().ShouldBe(new NoOngoingRent());
         }
 
         [Fact]
         public void CancelOngoingRent_ShouldRemoveTheOngoingRent_IfTheCustomerHasOne()
         {
-            _sut.RequestRent(_scooterId);
+            RequestRent();
 
-            _sut.CancelOngoingRent(CancellationReason);
+            CancelRent();
 
             _sut.OngoingRent.ShouldBeEmpty();
         }
@@ -90,24 +117,34 @@ namespace EScooter.RentService.UnitTests.Domain.Aggregates.CustomerAggregate
         [Fact]
         public void CancelOngoingRent_ShouldReturnTheCancelledRent_IfTheCustomerHasOne()
         {
-            var rent = _sut.RequestRent(_scooterId).ReadValue();
+            var rent = RequestRent();
 
-            _sut.CancelOngoingRent(CancellationReason).ShouldBe(rent);
+            CancelRent().ShouldBe(rent);
+        }
+
+        [Fact]
+        public void CancelOngoingRent_ShouldEmitAnEvent_IfTheCancellationIsSuccessful()
+        {
+            var rent = RequestRent();
+
+            CancelRent();
+
+            _sut.ShouldHaveEmitted(new RentCancelledEvent(_sut, rent, _cancellationReason));
         }
 
         [Fact]
         public void CancelOngoingRent_ShouldFail_IfTheCustomerHasNoOngoingRent()
         {
-            _sut.CancelOngoingRent(CancellationReason).ShouldBe(new NoOngoingRent());
+            CancelRent().ShouldBe(new NoOngoingRent());
         }
 
         [Fact]
         public void StopOngoingRent_ShouldRemoveTheOngoingRent_IfTheCustomerHasAConfirmedOne()
         {
-            _sut.RequestRent(_scooterId);
-            _sut.ConfirmOngoingRent(_timestamp1);
+            RequestRent();
+            ConfirmRent();
 
-            _sut.StopOngoingRent(_timestamp2, StopReason);
+            StopRent();
 
             _sut.OngoingRent.ShouldBeEmpty();
         }
@@ -115,24 +152,35 @@ namespace EScooter.RentService.UnitTests.Domain.Aggregates.CustomerAggregate
         [Fact]
         public void StopOngoingRent_ShouldReturnTheStoppedRent_IfTheCustomerHasAConfirmedOne()
         {
-            var rent = _sut.RequestRent(_scooterId).ReadValue();
-            _sut.ConfirmOngoingRent(_timestamp1);
+            var rent = RequestRent();
+            ConfirmRent();
 
-            _sut.StopOngoingRent(_timestamp2, StopReason).ShouldBe(rent);
+            StopRent().ShouldBe(rent);
+        }
+
+        [Fact]
+        public void StopOngoingRent_ShouldEmitAnEvent_IfTheStopIsSuccessful()
+        {
+            var rent = RequestRent();
+            ConfirmRent();
+
+            StopRent();
+
+            _sut.ShouldHaveEmitted(new RentStoppedEvent(_sut, rent, _stopReason, _stopTimestamp));
         }
 
         [Fact]
         public void StopOngoingRent_ShouldFail_IfTheOngoingRentIsNotConfirmed()
         {
-            _sut.RequestRent(_scooterId);
+            RequestRent();
 
-            _sut.StopOngoingRent(_timestamp1, StopReason).ShouldBe(new RentNotConfirmed());
+            StopRent().ShouldBe(new RentNotConfirmed());
         }
 
         [Fact]
         public void StopOngoingRent_ShouldFail_IfTheCustomerHasNoOngoingRent()
         {
-            _sut.StopOngoingRent(_timestamp1, StopReason).ShouldBe(new NoOngoingRent());
+            StopRent().ShouldBe(new NoOngoingRent());
         }
     }
 }
