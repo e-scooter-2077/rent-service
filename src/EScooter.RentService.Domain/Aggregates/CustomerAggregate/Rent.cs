@@ -20,14 +20,17 @@ namespace EScooter.RentService.Domain.Aggregates.CustomerAggregate
         /// </summary>
         /// <param name="id">The rent id.</param>
         /// <param name="scooterId">The scooter id.</param>
+        /// <param name="requestTimestamp">The instant in which the rent was requested.</param>
         /// <param name="confirmationInfo">The confirmation info, empty if the rent was not confirmed.</param>
         public Rent(
             Guid id,
             Guid scooterId,
+            Timestamp requestTimestamp,
             Option<RentConfirmationInfo> confirmationInfo)
         {
             Id = id;
             ScooterId = scooterId;
+            RequestTimestamp = requestTimestamp;
             ConfirmationInfo = confirmationInfo;
         }
 
@@ -40,6 +43,11 @@ namespace EScooter.RentService.Domain.Aggregates.CustomerAggregate
         /// The identifier of the scooter used by this rent.
         /// </summary>
         public Guid ScooterId { get; }
+
+        /// <summary>
+        /// The instant in which the rent was requested.
+        /// </summary>
+        public Timestamp RequestTimestamp { get; }
 
         /// <summary>
         /// Information about the confirmation of this rent.
@@ -56,12 +64,14 @@ namespace EScooter.RentService.Domain.Aggregates.CustomerAggregate
         /// Creates a new <see cref="Rent"/> in the initial state for the scooter with the specified Id.
         /// </summary>
         /// <param name="scooterId">The scooter Id.</param>
+        /// <param name="requestTimestamp">The instant in which the rent was requested.</param>
         /// <returns>A new <see cref="Rent"/>.</returns>
-        public static Rent CreateForScooter(Guid scooterId)
+        public static Rent CreateForScooter(Guid scooterId, Timestamp requestTimestamp)
         {
             return new Rent(
                 id: Guid.NewGuid(),
                 scooterId: scooterId,
+                requestTimestamp: requestTimestamp,
                 confirmationInfo: None);
         }
 

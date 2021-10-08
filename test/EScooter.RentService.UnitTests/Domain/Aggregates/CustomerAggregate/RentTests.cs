@@ -9,43 +9,46 @@ namespace EScooter.RentService.UnitTests.Domain.Aggregates.CustomerAggregate
 {
     public class RentTests
     {
-        private readonly Timestamp _timestamp1 = Timestamp.Now;
-        private readonly Timestamp _timestamp2 = Timestamp.Now + TimeOffset.FromMinutes(1);
         private readonly Guid _scooterId = Guid.NewGuid();
         private readonly Rent _sut;
 
         public RentTests()
         {
-            _sut = Rent.CreateForScooter(_scooterId);
+            _sut = Rent.CreateForScooter(_scooterId, RequestTimestamp);
         }
+
+        private Timestamp RequestTimestamp { get; } = Timestamp.Now;
+
+        private Timestamp ConfirmationTimestamp => RequestTimestamp + TimeOffset.FromSeconds(1);
 
         [Fact]
         public void CreateForScooter_ShouldReturnARentInTheInitialState()
         {
             _sut.ScooterId.ShouldBe(_scooterId);
             _sut.ConfirmationInfo.ShouldBeEmpty();
+            _sut.RequestTimestamp.ShouldBe(RequestTimestamp);
         }
 
         [Fact]
         public void Confirm_ShouldFillTheRentWithConfirmationInfo_IfTheRentIsPending()
         {
-            _sut.Confirm(_timestamp1);
+            _sut.Confirm(ConfirmationTimestamp);
 
-            _sut.ConfirmationInfo.ShouldContain(new RentConfirmationInfo(_timestamp1));
+            _sut.ConfirmationInfo.ShouldContain(new RentConfirmationInfo(ConfirmationTimestamp));
         }
 
         [Fact]
         public void Confirm_ShouldReturnOk_IfTheRentIsPending()
         {
-            _sut.Confirm(_timestamp1).ShouldBe(Ok);
+            _sut.Confirm(ConfirmationTimestamp).ShouldBe(Ok);
         }
 
         [Fact]
         public void Confirm_ShouldFail_IfTheRentHasAlreadyBeenConfirmed()
         {
-            _sut.Confirm(_timestamp1);
+            _sut.Confirm(ConfirmationTimestamp);
 
-            _sut.Confirm(_timestamp2).ShouldBe(new RentAlreadyConfirmed());
+            _sut.Confirm(ConfirmationTimestamp + TimeOffset.FromSeconds(1)).ShouldBe(new RentAlreadyConfirmed());
         }
     }
 }

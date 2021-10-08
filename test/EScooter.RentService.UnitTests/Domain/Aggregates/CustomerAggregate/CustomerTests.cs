@@ -12,8 +12,6 @@ namespace EScooter.RentService.UnitTests.Domain.Aggregates.CustomerAggregate
     {
         private readonly Customer _sut;
         private readonly Guid _scooterId = Guid.NewGuid();
-        private readonly Timestamp _confirmationTimestamp = Timestamp.Now;
-        private readonly Timestamp _stopTimestamp = Timestamp.Now + TimeOffset.FromMinutes(1);
         private readonly RentCancellationReason _cancellationReason = RentCancellationReason.InternalError;
         private readonly RentStopReason _stopReason = RentStopReason.StoppedByCustomer;
 
@@ -22,13 +20,19 @@ namespace EScooter.RentService.UnitTests.Domain.Aggregates.CustomerAggregate
             _sut = Customer.Create(Guid.NewGuid());
         }
 
-        private Rent RequestRent() => _sut.RequestRent(_scooterId).ReadValue();
+        private Timestamp RequestTimestamp { get; } = Timestamp.Now;
 
-        private Result<Rent> ConfirmRent() => _sut.ConfirmOngoingRent(_confirmationTimestamp);
+        private Timestamp ConfirmationTimestamp => RequestTimestamp + TimeOffset.FromSeconds(1);
+
+        private Timestamp StopTimestamp => ConfirmationTimestamp + TimeOffset.FromMinutes(20);
+
+        private Rent RequestRent() => _sut.RequestRent(_scooterId, RequestTimestamp).ReadValue();
+
+        private Result<Rent> ConfirmRent() => _sut.ConfirmOngoingRent(ConfirmationTimestamp);
 
         private Result<Rent> CancelRent() => _sut.CancelOngoingRent(_cancellationReason);
 
-        private Result<Rent> StopRent() => _sut.StopOngoingRent(_stopTimestamp, _stopReason);
+        private Result<Rent> StopRent() => _sut.StopOngoingRent(_stopReason, StopTimestamp);
 
         [Fact]
         public void Create_ShouldCreateACustomerWithNoActiveRent()
@@ -67,7 +71,7 @@ namespace EScooter.RentService.UnitTests.Domain.Aggregates.CustomerAggregate
         {
             RequestRent();
 
-            _sut.RequestRent(Guid.NewGuid()).ShouldBe(new RentAlreadyOngoing());
+            _sut.RequestRent(Guid.NewGuid(), RequestTimestamp).ShouldBe(new RentAlreadyOngoing());
         }
 
         [Fact]
@@ -85,7 +89,7 @@ namespace EScooter.RentService.UnitTests.Domain.Aggregates.CustomerAggregate
 
             ConfirmRent();
 
-            _sut.OngoingRent.Value.ConfirmationInfo.ShouldContain(new RentConfirmationInfo(_confirmationTimestamp));
+            _sut.OngoingRent.Value.ConfirmationInfo.ShouldContain(new RentConfirmationInfo(ConfirmationTimestamp));
         }
 
         [Fact]
@@ -95,7 +99,7 @@ namespace EScooter.RentService.UnitTests.Domain.Aggregates.CustomerAggregate
 
             ConfirmRent();
 
-            _sut.ShouldHaveEmitted(new RentConfirmedEvent(_sut, rent, _confirmationTimestamp));
+            _sut.ShouldHaveEmitted(new RentConfirmedEvent(_sut, rent, ConfirmationTimestamp));
         }
 
         [Fact]
@@ -166,7 +170,7 @@ namespace EScooter.RentService.UnitTests.Domain.Aggregates.CustomerAggregate
 
             StopRent();
 
-            _sut.ShouldHaveEmitted(new RentStoppedEvent(_sut, rent, _stopReason, _stopTimestamp));
+            _sut.ShouldHaveEmitted(new RentStoppedEvent(_sut, rent, _stopReason, StopTimestamp));
         }
 
         [Fact]

@@ -37,24 +37,22 @@ namespace EScooter.RentService.Domain.Aggregates.CustomerAggregate
         /// </summary>
         /// <param name="id">The customer Id.</param>
         /// <returns>The new <see cref="Customer"/>.</returns>
-        public static Customer Create(Guid id)
-        {
-            return new(id, ongoingRent: None);
-        }
+        public static Customer Create(Guid id) => new(id, ongoingRent: None);
 
         /// <summary>
         /// Requests for this customer a new <see cref="Rent"/> for the given scooter.
         /// This operation fails with a <see cref="RentAlreadyOngoing"/> error if a rent is ongoing.
         /// </summary>
         /// <param name="scooterId">The scooter Id.</param>
+        /// <param name="requestTimestamp">The instant in which the rent is requested.</param>
         /// <returns>A result containing the requested <see cref="Rent"/> or an error.</returns>
-        public Result<Rent> RequestRent(Guid scooterId)
+        public Result<Rent> RequestRent(Guid scooterId, Timestamp requestTimestamp)
         {
             if (HasOngoingRent)
             {
                 return new RentAlreadyOngoing();
             }
-            var rent = Rent.CreateForScooter(scooterId);
+            var rent = Rent.CreateForScooter(scooterId, requestTimestamp);
             OngoingRent = rent;
             EmitEvent(new RentRequestedEvent(this, rent));
             return rent;
@@ -92,10 +90,10 @@ namespace EScooter.RentService.Domain.Aggregates.CustomerAggregate
         /// <summary>
         /// Stops the ongoing <see cref="Rent"/> for the given reason, marking its actual stopping time.
         /// </summary>
-        /// <param name="timestamp">The stopping instant.</param>
         /// <param name="reason">The reason for stopping the <see cref="Rent"/>.</param>
+        /// <param name="timestamp">The stopping instant.</param>
         /// <returns>A result containing the stopped <see cref="Rent"/> or an error.</returns>
-        public Result<Rent> StopOngoingRent(Timestamp timestamp, RentStopReason reason)
+        public Result<Rent> StopOngoingRent(RentStopReason reason, Timestamp timestamp)
         {
             return RequireOngoingRent()
                 .Require(rent => RequireTrue(rent.IsConfirmed, () => new RentNotConfirmed()))
