@@ -19,7 +19,7 @@ namespace EScooter.RentService.UnitTests.Domain.Aggregates.CustomerAggregate
 
         private Timestamp RequestTimestamp { get; } = Timestamp.Now;
 
-        private Timestamp ConfirmationTimestamp => RequestTimestamp + TimeOffset.FromSeconds(1);
+        private RentConfirmationInfo ConfirmationInfo => new(RequestTimestamp + TimeOffset.FromSeconds(1));
 
         [Fact]
         public void CreateForScooter_ShouldReturnARentInTheInitialState()
@@ -32,23 +32,24 @@ namespace EScooter.RentService.UnitTests.Domain.Aggregates.CustomerAggregate
         [Fact]
         public void Confirm_ShouldFillTheRentWithConfirmationInfo_IfTheRentIsPending()
         {
-            _sut.Confirm(ConfirmationTimestamp);
+            _sut.Confirm(ConfirmationInfo);
 
-            _sut.ConfirmationInfo.ShouldContain(new RentConfirmationInfo(ConfirmationTimestamp));
+            _sut.ConfirmationInfo.ShouldContain(ConfirmationInfo);
         }
 
         [Fact]
         public void Confirm_ShouldReturnOk_IfTheRentIsPending()
         {
-            _sut.Confirm(ConfirmationTimestamp).ShouldBe(Ok);
+            _sut.Confirm(ConfirmationInfo).ShouldBe(Ok);
         }
 
         [Fact]
         public void Confirm_ShouldFail_IfTheRentHasAlreadyBeenConfirmed()
         {
-            _sut.Confirm(ConfirmationTimestamp);
+            _sut.Confirm(ConfirmationInfo);
 
-            _sut.Confirm(ConfirmationTimestamp + TimeOffset.FromSeconds(1)).ShouldBe(new RentAlreadyConfirmed());
+            var newConfirmation = ConfirmationInfo with { Timestamp = ConfirmationInfo.Timestamp + TimeOffset.FromSeconds(1) };
+            _sut.Confirm(newConfirmation).ShouldBe(new RentAlreadyConfirmed());
         }
     }
 }

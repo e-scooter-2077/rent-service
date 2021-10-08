@@ -79,12 +79,12 @@ namespace EScooter.RentService.Domain.Aggregates.CustomerAggregate
         /// Confirms this <see cref="Rent"/>, marking its actual start time.
         /// This operations fails with a <see cref="RentAlreadyConfirmed"/> error if this rent has already been confirmed.
         /// </summary>
-        /// <param name="timestamp">The confirmation instant.</param>
+        /// <param name="confirmationInfo">The information about how to confirm the rent.</param>
         /// <returns>A result that indicates whether the operation was successful.</returns>
-        public Result<Nothing> Confirm(Timestamp timestamp)
+        public Result<Nothing> Confirm(RentConfirmationInfo confirmationInfo)
         {
             return RequireNotConfirmed()
-                .IfSuccess(_ => ConfirmationInfo = new RentConfirmationInfo(timestamp));
+                .IfSuccess(_ => ConfirmationInfo = confirmationInfo);
         }
 
         private Result<Nothing> RequireNotConfirmed() => RequireFalse(IsConfirmed, () => new RentAlreadyConfirmed());
