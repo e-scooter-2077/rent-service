@@ -10,7 +10,7 @@ using static EasyDesk.Tools.Options.OptionImports;
 namespace EScooter.RentService.Domain.Aggregates.CustomerAggregate
 {
     /// <summary>
-    /// Represents a customer able to perform <see cref="Rent"/>s.
+    /// Represents a customer within the Rent Context, that is entity able to perform <see cref="Rent"/>s.
     /// </summary>
     public class Customer : AggregateRoot<Customer>
     {
