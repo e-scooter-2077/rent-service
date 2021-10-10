@@ -18,18 +18,40 @@ namespace EScooter.RentService.Domain.Aggregates.ScooterAggregate
         /// This constructor should only be used for re-hydration by the infrastructure layer.
         /// </summary>
         /// <param name="id">The scooter Id.</param>
-        /// <param name="isRentable">The rentability state.</param>
         /// <param name="rentingCustomerId">The Id of the customer currently renting this scooter, if any.</param>
-        public Scooter(Guid id, bool isRentable, Option<Guid> rentingCustomerId) : base(id)
+        /// <param name="isEnabled">The enabled state.</param>
+        /// <param name="isOutOfService">The out-of-service state.</param>
+        /// <param name="isInStandby">The standby state.</param>
+        public Scooter(
+            Guid id,
+            Option<Guid> rentingCustomerId,
+            bool isEnabled,
+            bool isOutOfService,
+            bool isInStandby) : base(id)
         {
-            IsRentable = isRentable;
             RentingCustomerId = rentingCustomerId;
+            IsEnabled = isEnabled;
+            IsOutOfService = isOutOfService;
+            IsInStandby = isInStandby;
         }
 
         /// <summary>
-        /// Indicates whether customers are currently authorized to rent this scooter.
+        /// Indicates whether this scooter is enabled, due to a maintainer's choice.
+        /// A scooter cannot be rented as long as it is disabled.
         /// </summary>
-        public bool IsRentable { get; private set; }
+        public bool IsEnabled { get; private set; }
+
+        /// <summary>
+        /// Indicates whether this scooter is out of service, due to the scooter leaving its area of service.
+        /// A scooter cannot be rented as long as it is out of service.
+        /// </summary>
+        public bool IsOutOfService { get; private set; }
+
+        /// <summary>
+        /// Indicates whether this scooter is in standby mode, due to the scooter's battery falling below the minimum level.
+        /// A scooter cannot be rented as long as it is in standby.
+        /// </summary>
+        public bool IsInStandby { get; private set; }
 
         /// <summary>
         /// The identifier of the customer currently renting this scooter.
@@ -38,6 +60,27 @@ namespace EScooter.RentService.Domain.Aggregates.ScooterAggregate
         public Option<Guid> RentingCustomerId { get; private set; }
 
         private bool IsAvailable => RentingCustomerId.IsAbsent;
+
+        private bool IsRentable => IsEnabled && !IsOutOfService && !IsInStandby;
+
+        private Result<Nothing> RequireRentablility() => RequireTrue(IsRentable, () => new NotRentable());
+
+        private Result<Nothing> RequireAvailability() => RequireTrue(IsAvailable, () => new AlreadyRented());
+
+        /// <summary>
+        /// Creates a new scooter in its default state.
+        /// </summary>
+        /// <param name="id">The scooter Id.</param>
+        /// <returns>A new <see cref="Scooter"/>.</returns>
+        public static Scooter Create(Guid id)
+        {
+            return new(
+                id: id,
+                rentingCustomerId: None,
+                isEnabled: true,
+                isInStandby: false,
+                isOutOfService: false);
+        }
 
         /// <summary>
         /// Marks this scooter as rented by the customer with the given Id.
@@ -50,15 +93,8 @@ namespace EScooter.RentService.Domain.Aggregates.ScooterAggregate
         {
             return RequireRentablility()
                 .Require(_ => RequireAvailability())
-                .IfSuccess(_ =>
-                {
-                    RentingCustomerId = customerId;
-                });
+                .IfSuccess(_ => RentingCustomerId = customerId);
         }
-
-        private Result<Nothing> RequireRentablility() => RequireTrue(IsRentable, () => new NotRentable());
-
-        private Result<Nothing> RequireAvailability() => RequireTrue(IsAvailable, () => new AlreadyRented());
 
         /// <summary>
         /// Marks this scooter as not rented by any customer. If this scooter was already not rented, the scooter
@@ -67,14 +103,40 @@ namespace EScooter.RentService.Domain.Aggregates.ScooterAggregate
         public void ClearRent() => RentingCustomerId = None;
 
         /// <summary>
-        /// Allows customers to rent this scooter.
+        /// Enables this scooter.
         /// </summary>
-        public void MakeRentable() => IsRentable = true;
+        public void Enable() => SetEnabled(enabled: true);
 
         /// <summary>
-        /// Disallows customers to rent this scooter.
+        /// Disables this scooter.
         /// </summary>
-        public void MakeNotRentable() => IsRentable = false;
+        public void Disable() => SetEnabled(enabled: false);
+
+        private void SetEnabled(bool enabled) => IsEnabled = enabled;
+
+        /// <summary>
+        /// Makes this scooter enter standby mode.
+        /// </summary>
+        public void EnterStandby() => SetStandby(standby: true);
+
+        /// <summary>
+        /// Makes this scooter leave standby mode.
+        /// </summary>
+        public void LeaveStandby() => SetStandby(standby: false);
+
+        private void SetStandby(bool standby) => IsInStandby = standby;
+
+        /// <summary>
+        /// Marks this scooter as being inside an area of service.
+        /// </summary>
+        public void EnterAreaOfService() => SetOutOfService(outOfService: false);
+
+        /// <summary>
+        /// Marks this scooter as not being inside an area of service.
+        /// </summary>
+        public void LeaveAreaOfService() => SetOutOfService(outOfService: true);
+
+        private void SetOutOfService(bool outOfService) => IsOutOfService = outOfService;
     }
 
     /// <summary>

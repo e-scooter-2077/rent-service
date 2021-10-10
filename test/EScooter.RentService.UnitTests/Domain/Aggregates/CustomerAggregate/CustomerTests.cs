@@ -42,11 +42,9 @@ namespace EScooter.RentService.UnitTests.Domain.Aggregates.CustomerAggregate
         [Fact]
         public void RequestRent_ShouldReturnTheCreatedRent_IfTheCustomerHasNoOngoingRent()
         {
-            RequestRent().ShouldSatisfyAllConditions(rent =>
-            {
-                rent.ScooterId.ShouldBe(_scooterId);
-                rent.ConfirmationInfo.ShouldBeEmpty();
-            });
+            RequestRent().ShouldSatisfyAllConditions(
+                rent => rent.ScooterId.ShouldBe(_scooterId),
+                rent => rent.ConfirmationInfo.ShouldBeEmpty());
         }
 
         [Fact]

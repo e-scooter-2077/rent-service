@@ -24,9 +24,10 @@ namespace EScooter.RentService.UnitTests.Domain.Aggregates.CustomerAggregate
         [Fact]
         public void CreateForScooter_ShouldReturnARentInTheInitialState()
         {
-            _sut.ScooterId.ShouldBe(_scooterId);
-            _sut.ConfirmationInfo.ShouldBeEmpty();
-            _sut.RequestTimestamp.ShouldBe(RequestTimestamp);
+            _sut.ShouldSatisfyAllConditions(
+                rent => rent.ScooterId.ShouldBe(_scooterId),
+                rent => rent.ConfirmationInfo.ShouldBeEmpty(),
+                rent => rent.RequestTimestamp.ShouldBe(RequestTimestamp));
         }
 
         [Fact]
