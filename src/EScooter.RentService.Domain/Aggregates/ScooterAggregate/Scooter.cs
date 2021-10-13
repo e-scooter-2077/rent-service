@@ -11,7 +11,7 @@ namespace EScooter.RentService.Domain.Aggregates.ScooterAggregate
     /// <summary>
     /// Represents a scooter within the Rent Context, holding state about its rentability at any moment.
     /// </summary>
-    public class Scooter : AggregateRoot<Scooter>
+    public class Scooter : AggregateRoot
     {
         /// <summary>
         /// Create a new <see cref="Scooter"/>.
@@ -27,13 +27,19 @@ namespace EScooter.RentService.Domain.Aggregates.ScooterAggregate
             Option<Guid> rentingCustomerId,
             bool isEnabled,
             bool isOutOfService,
-            bool isInStandby) : base(id)
+            bool isInStandby)
         {
+            Id = id;
             RentingCustomerId = rentingCustomerId;
             IsEnabled = isEnabled;
             IsOutOfService = isOutOfService;
             IsInStandby = isInStandby;
         }
+
+        /// <summary>
+        /// The unique identifier of this scooter.
+        /// </summary>
+        public Guid Id { get; }
 
         /// <summary>
         /// Indicates whether this scooter is enabled, due to a maintainer's choice.

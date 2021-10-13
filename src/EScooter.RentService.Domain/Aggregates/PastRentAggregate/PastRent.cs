@@ -7,7 +7,7 @@ namespace EScooter.RentService.Domain.Aggregates.PastRentAggregate
     /// <summary>
     /// Represents a rent after its completion, either by a correct stop or by cancellation.
     /// </summary>
-    public class PastRent : AggregateRoot<PastRent>
+    public class PastRent : AggregateRoot
     {
         /// <summary>
         /// Creates a new <see cref="PastRent"/>.
@@ -22,13 +22,19 @@ namespace EScooter.RentService.Domain.Aggregates.PastRentAggregate
             Guid scooterId,
             Guid customerId,
             Timestamp requestTimestamp,
-            RentOutcome outcome) : base(id)
+            RentOutcome outcome)
         {
+            Id = id;
             ScooterId = scooterId;
             CustomerId = customerId;
             RequestTimestamp = requestTimestamp;
             Outcome = outcome;
         }
+
+        /// <summary>
+        /// The unique identifier of this rent.
+        /// </summary>
+        public Guid Id { get; }
 
         /// <summary>
         /// The identifier of the scooter used by this rent.

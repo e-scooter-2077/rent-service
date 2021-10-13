@@ -4,9 +4,9 @@
     ".NETCoreApp,Version=v5.0": {
       "EasyDesk.CleanArchitecture.Domain": {
         "type": "Direct",
-        "requested": "[0.16.0, )",
-        "resolved": "0.16.0",
-        "contentHash": "wkP3D+DRRp1dIgLomhcM0QS0LSiAEqe+8RK+m8HUr/kTFhbAphZjHkVof9rol/4Lvhezao6j0XSQ7QFTblVfiA==",
+        "requested": "[0.20.0, )",
+        "resolved": "0.20.0",
+        "contentHash": "Fmym9RWp3Ul1/JOdF8M6Sbkk5f1+6pkG6J9o61LknvBzSL1d1NZWkX5Qj8plQMlAvkYnkBju9QBZi3Ftb3y6tw==",
         "dependencies": {
           "EasyDesk.Tools": "1.3.2"
         }

@@ -12,7 +12,7 @@ namespace EScooter.RentService.Domain.Aggregates.CustomerAggregate
     /// <summary>
     /// Represents the Rent of a scooter, holding state data about its lifecycle.
     /// </summary>
-    public class Rent : Entity<Rent, Guid>.ExplicitId
+    public class Rent : Entity
     {
         /// <summary>
         /// Creates a new Rent from its properties.
@@ -37,7 +37,7 @@ namespace EScooter.RentService.Domain.Aggregates.CustomerAggregate
         /// <summary>
         /// The identifier of the rent.
         /// </summary>
-        public override Guid Id { get; }
+        public Guid Id { get; }
 
         /// <summary>
         /// The identifier of the scooter used by this rent.

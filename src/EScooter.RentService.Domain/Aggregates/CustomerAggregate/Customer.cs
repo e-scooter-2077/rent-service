@@ -3,6 +3,7 @@ using EasyDesk.CleanArchitecture.Domain.Metamodel.Results;
 using EasyDesk.CleanArchitecture.Domain.Utils;
 using EasyDesk.Tools.Options;
 using EasyDesk.Tools.PrimitiveTypes.DateAndTime;
+using EScooter.RentService.Domain.Aggregates.PastRentAggregate;
 using System;
 using static EasyDesk.CleanArchitecture.Domain.Metamodel.Results.ResultImports;
 using static EasyDesk.Tools.Options.OptionImports;
@@ -12,7 +13,7 @@ namespace EScooter.RentService.Domain.Aggregates.CustomerAggregate
     /// <summary>
     /// Represents a customer within the Rent Context, that is entity able to perform <see cref="Rent"/>s.
     /// </summary>
-    public class Customer : AggregateRoot<Customer>
+    public class Customer : AggregateRoot
     {
         /// <summary>
         /// Creates a new <see cref="Customer"/>.
@@ -20,10 +21,16 @@ namespace EScooter.RentService.Domain.Aggregates.CustomerAggregate
         /// </summary>
         /// <param name="id">The customer identifier.</param>
         /// <param name="ongoingRent">The optional ongoing <see cref="Rent"/>.</param>
-        public Customer(Guid id, Option<Rent> ongoingRent) : base(id)
+        public Customer(Guid id, Option<Rent> ongoingRent)
         {
+            Id = id;
             OngoingRent = ongoingRent;
         }
+
+        /// <summary>
+        /// The unique identifier of this customer.
+        /// </summary>
+        public Guid Id { get; }
 
         /// <summary>
         /// Returns the currently active <see cref="Rent"/> for this customer, if any.
@@ -82,8 +89,9 @@ namespace EScooter.RentService.Domain.Aggregates.CustomerAggregate
             return RequireOngoingRent()
                 .IfSuccess(rent =>
                 {
-                    CompleteOngoingRent();
+                    EndOngoingRent();
                     EmitEvent(new RentCancelledEvent(this, rent, cancellationInfo));
+                    EmitEvent(new RentEndedEvent(this, rent, RentOutcome.Cancelled(cancellationInfo)));
                 });
         }
 
@@ -98,14 +106,15 @@ namespace EScooter.RentService.Domain.Aggregates.CustomerAggregate
                 .Require(rent => RequireTrue(rent.IsConfirmed, () => new RentNotConfirmed()))
                 .IfSuccess(rent =>
                 {
-                    CompleteOngoingRent();
+                    EndOngoingRent();
                     EmitEvent(new RentStoppedEvent(this, rent, stopInfo));
+                    EmitEvent(new RentEndedEvent(this, rent, RentOutcome.Completed(rent.ConfirmationInfo.Value, stopInfo)));
                 });
         }
 
         private Result<Rent> RequireOngoingRent() => OngoingRent.OrElseError(() => new NoOngoingRent());
 
-        private void CompleteOngoingRent() => OngoingRent = None;
+        private void EndOngoingRent() => OngoingRent = None;
     }
 
     /// <summary>
@@ -113,7 +122,7 @@ namespace EScooter.RentService.Domain.Aggregates.CustomerAggregate
     /// </summary>
     /// <param name="Customer">The customer requesting the rent.</param>
     /// <param name="Rent">The requested rent.</param>
-    public record RentRequestedEvent(Customer Customer, Rent Rent) : IDomainEvent;
+    public record RentRequestedEvent(Customer Customer, Rent Rent) : DomainEvent;
 
     /// <summary>
     /// An event emitted when a rent is confirmed.
@@ -121,7 +130,7 @@ namespace EScooter.RentService.Domain.Aggregates.CustomerAggregate
     /// <param name="Customer">The customer for which the rent was confirmed.</param>
     /// <param name="Rent">The confirmed rent.</param>
     /// <param name="ConfirmationInfo">The information about how the rent was confirmed.</param>
-    public record RentConfirmedEvent(Customer Customer, Rent Rent, RentConfirmationInfo ConfirmationInfo) : IDomainEvent;
+    public record RentConfirmedEvent(Customer Customer, Rent Rent, RentConfirmationInfo ConfirmationInfo) : DomainEvent;
 
     /// <summary>
     /// An event emitted when a rent is cancelled.
@@ -129,7 +138,7 @@ namespace EScooter.RentService.Domain.Aggregates.CustomerAggregate
     /// <param name="Customer">The customer for which the rent was cancelled.</param>
     /// <param name="Rent">The cancelled rent.</param>
     /// <param name="CancellationInfo">The information about how the rent was cancelled.</param>
-    public record RentCancelledEvent(Customer Customer, Rent Rent, RentCancellationInfo CancellationInfo) : IDomainEvent;
+    public record RentCancelledEvent(Customer Customer, Rent Rent, RentCancellationInfo CancellationInfo) : DomainEvent;
 
     /// <summary>
     /// An event emitted when a rent is stopped.
@@ -137,7 +146,15 @@ namespace EScooter.RentService.Domain.Aggregates.CustomerAggregate
     /// <param name="Customer">The customer for which the rent was stopped.</param>
     /// <param name="Rent">The stopped rent.</param>
     /// <param name="StopInfo">The information about how the rent was stopped.</param>
-    public record RentStoppedEvent(Customer Customer, Rent Rent, RentStopInfo StopInfo) : IDomainEvent;
+    public record RentStoppedEvent(Customer Customer, Rent Rent, RentStopInfo StopInfo) : DomainEvent;
+
+    /// <summary>
+    /// An event emitted when a rent ends, either by a stop or by cancellation.
+    /// </summary>
+    /// <param name="Customer">The customer for which the rent was ended.</param>
+    /// <param name="Rent">The ended rent.</param>
+    /// <param name="Outcome">The Outcome of the rent.</param>
+    public record RentEndedEvent(Customer Customer, Rent Rent, RentOutcome Outcome) : DomainEvent;
 
     /// <summary>
     /// An error returned when trying to request a rent while another one is still ongoing.
