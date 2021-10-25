@@ -1,5 +1,7 @@
 ﻿using EasyDesk.CleanArchitecture.Domain.Metamodel.Repositories;
+using EasyDesk.CleanArchitecture.Domain.Metamodel.Results;
 using System;
+using System.Threading.Tasks;
 
 namespace EScooter.RentService.Domain.Aggregates.CustomerAggregate
 {
@@ -8,5 +10,6 @@ namespace EScooter.RentService.Domain.Aggregates.CustomerAggregate
         ISaveRepository<Customer>,
         IRemoveRepository<Customer>
     {
+        Task<Result<Customer>> GetByRent(Guid rentId);
     }
 }
