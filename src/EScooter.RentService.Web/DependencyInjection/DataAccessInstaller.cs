@@ -1,6 +1,8 @@
 ﻿using EasyDesk.CleanArchitecture.Dal.EfCore;
 using EasyDesk.CleanArchitecture.Web.DependencyInjection;
+using EScooter.RentService.Infrastructure.DataAccess;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -13,6 +15,7 @@ namespace EScooter.RentService.Web.DependencyInjection
             services.AddEfCoreDataAccess(configuration.GetConnectionString("MainDb"), options =>
             {
                 options
+                    .AddEntities<RentDbContext>()
                     .AddOutbox()
                     .AddIdemptenceManager();
             });
