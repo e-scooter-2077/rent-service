@@ -24,7 +24,6 @@ jobs:
       version: ${{ steps.semver.outputs.version }}
       should-release: ${{ steps.semver.outputs.should-release }}
       is-prerelease: ${{ steps.semver.outputs.is-github-prerelease }}
-      should-deploy: ${{ env.AZURE_APP_SERVICE_NAME != '' }}
     steps:
       - id: semver
         name: Checkout
@@ -68,7 +67,6 @@ jobs:
     needs: [build, release]
     concurrency: deploy-production
     environment: production
-    if: needs.build.outputs.should-deploy == 'true'
     steps:
       - uses: actions/download-artifact@v2
         with:
