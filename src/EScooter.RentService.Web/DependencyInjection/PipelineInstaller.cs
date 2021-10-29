@@ -20,9 +20,9 @@ namespace EScooter.RentService.Web.DependencyInjection
         protected override Type WebAssemblyMarker => typeof(Startup);
 
         /// <inheritdoc/>
-        protected override bool UsesPublisher => false;
+        protected override bool UsesPublisher => true;
 
         /// <inheritdoc/>
-        protected override bool UsesConsumer => false;
+        protected override bool UsesConsumer => true;
     }
 }

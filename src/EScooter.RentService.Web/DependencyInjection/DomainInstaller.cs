@@ -1,7 +1,11 @@
 ﻿using EasyDesk.CleanArchitecture.Web.DependencyInjection;
+using EScooter.RentService.Domain.Aggregates.CustomerAggregate;
+using EScooter.RentService.Domain.Aggregates.PastRentAggregate;
+using EScooter.RentService.Domain.Aggregates.ScooterAggregate;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using System;
 
 namespace EScooter.RentService.Web.DependencyInjection
 {
@@ -13,7 +17,9 @@ namespace EScooter.RentService.Web.DependencyInjection
         /// <inheritdoc/>
         public void InstallServices(IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
         {
-            // TODO: Register domain services here.
+            services.AddScoped<ICustomerRepository>(_ => throw new NotImplementedException());
+            services.AddScoped<IScooterRepository>(_ => throw new NotImplementedException());
+            services.AddScoped<IPastRentRepository>(_ => throw new NotImplementedException());
         }
     }
 }

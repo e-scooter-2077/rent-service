@@ -6,6 +6,7 @@
 
   <ItemGroup>
     <PackageReference Include="EasyDesk.CleanArchitecture.Infrastructure" Version="0.20.0" />
+    <PackageReference Include="EasyDesk.CleanArchitecture.Dal.EfCore" Version="0.20.0" />
   </ItemGroup>
 
   <ItemGroup>

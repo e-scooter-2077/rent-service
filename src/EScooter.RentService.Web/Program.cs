@@ -20,7 +20,7 @@ namespace EScooter.RentService.Web
 
         private static IHostBuilder CreateHostBuilder(string[] args)
         {
-            return EntryPoint.CreateHostBuilder<Startup>(args, "___ENV_PREFIX____");
+            return EntryPoint.CreateHostBuilder<Startup>(args, "ESCOOTER_");
         }
     }
 }

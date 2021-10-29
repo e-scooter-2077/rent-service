@@ -1,7 +1,7 @@
 name: Continuous Integration
 
 env:
-  AZURE_APP_SERVICE_NAME: ''
+  AZURE_APP_SERVICE_NAME: escooter-rent-service
 
 on:
   workflow_dispatch:
@@ -67,6 +67,7 @@ jobs:
     runs-on: windows-2019
     needs: [build, release]
     concurrency: deploy-production
+    environment: production
     if: needs.build.outputs.should-deploy == 'true'
     steps:
       - uses: actions/download-artifact@v2
