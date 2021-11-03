@@ -6,6 +6,7 @@ using EasyDesk.Tools.PrimitiveTypes.DateAndTime;
 using System;
 using System.Linq;
 using static EasyDesk.CleanArchitecture.Domain.Metamodel.Results.ResultImports;
+using static EasyDesk.Tools.Options.OptionImports;
 
 namespace EScooter.RentService.Domain.Aggregates.RentAggregate
 {
@@ -16,21 +17,31 @@ namespace EScooter.RentService.Domain.Aggregates.RentAggregate
     {
         /// <summary>
         /// Creates a new <see cref="Rent"/>.
+        /// This constructor should only be used for re-hydration by the infrastructure layer.
         /// </summary>
         /// <param name="id">The rent Id.</param>
         /// <param name="scooterId">The scooter Id.</param>
         /// <param name="customerId">The customer Id.</param>
         /// <param name="requestTimestamp">The timestamp at which the rent was requested.</param>
+        /// <param name="confirmationInfo">The confirmation info.</param>
+        /// <param name="cancellationInfo">The cancellation info.</param>
+        /// <param name="stopInfo">The stop info.</param>
         public Rent(
             Guid id,
             Guid scooterId,
             Guid customerId,
-            Timestamp requestTimestamp)
+            Timestamp requestTimestamp,
+            Option<RentConfirmationInfo> confirmationInfo,
+            Option<RentCancellationInfo> cancellationInfo,
+            Option<RentStopInfo> stopInfo)
         {
             Id = id;
             ScooterId = scooterId;
             CustomerId = customerId;
             RequestTimestamp = requestTimestamp;
+            ConfirmationInfo = confirmationInfo;
+            CancellationInfo = cancellationInfo;
+            StopInfo = stopInfo;
         }
 
         /// <summary>
@@ -107,7 +118,10 @@ namespace EScooter.RentService.Domain.Aggregates.RentAggregate
                 id: Guid.NewGuid(),
                 scooterId: scooterId,
                 customerId: customerId,
-                requestTimestamp: requestTimestamp);
+                requestTimestamp: requestTimestamp,
+                confirmationInfo: None,
+                cancellationInfo: None,
+                stopInfo: None);
             rent.EmitEvent(new RentRequestedEvent(rent));
             return rent;
         }
