@@ -1,4 +1,7 @@
 ﻿using System;
+using EasyDesk.CleanArchitecture.Domain.Metamodel.Results;
+using EasyDesk.CleanArchitecture.Testing;
+using EasyDesk.Tools;
 using EasyDesk.Tools.PrimitiveTypes.DateAndTime;
 using EScooter.RentService.Domain.Aggregates.RentAggregate;
 using Shouldly;
@@ -11,6 +14,7 @@ namespace EScooter.RentService.UnitTests.Domain.Aggregates.RentAggregate
     {
         private readonly Guid _scooterId = Guid.NewGuid();
         private readonly Guid _customerId = Guid.NewGuid();
+        private readonly SettableTimestampProvider _timestampProvider = new(Timestamp.Now);
         private readonly Rent _sut;
 
         public RentTests()
@@ -20,10 +24,23 @@ namespace EScooter.RentService.UnitTests.Domain.Aggregates.RentAggregate
 
         private Timestamp RequestTimestamp { get; } = Timestamp.Now;
 
-        private RentConfirmationInfo ConfirmationInfo => new(RequestTimestamp + TimeOffset.FromSeconds(1));
+        private Result<Nothing> DoAfterABit(Func<Timestamp, Result<Nothing>> action)
+        {
+            _timestampProvider.AdvanceBySeconds(1);
+            return action(_timestampProvider.Now);
+        }
+
+        private Result<Nothing> Confirm() =>
+            DoAfterABit(time => _sut.Confirm(new(time)));
+
+        private Result<Nothing> Cancel(RentCancellationReason reason = RentCancellationReason.CreditInsufficient) =>
+            DoAfterABit(time => _sut.Cancel(new(reason)));
+
+        private Result<Nothing> Stop(RentStopReason reason = RentStopReason.StoppedByCustomer) =>
+            DoAfterABit(time => _sut.Stop(new(reason, time)));
 
         [Fact]
-        public void CreateForScooter_ShouldReturnARentInTheInitialState()
+        public void Create_ShouldReturnARentInTheInitialState()
         {
             _sut.ShouldSatisfyAllConditions(
                 rent => rent.ScooterId.ShouldBe(_scooterId),
@@ -34,26 +51,153 @@ namespace EScooter.RentService.UnitTests.Domain.Aggregates.RentAggregate
         }
 
         [Fact]
+        public void State_ShouldBePending_ImmediatlyAfterCreation()
+        {
+            _sut.State.ShouldBe(RentState.Pending);
+        }
+
+        [Fact]
+        public void State_ShouldBeOngoing_IfTheRentIsConfirmed()
+        {
+            Confirm();
+
+            _sut.State.ShouldBe(RentState.Ongoing);
+        }
+
+        [Fact]
+        public void State_ShouldBeCancelled_IfTheRentIsCancelledBeforeConfirmation()
+        {
+            Cancel();
+
+            _sut.State.ShouldBe(RentState.Cancelled);
+        }
+
+        [Fact]
+        public void State_ShouldBeCancelled_IfTheRentIsCancelledAfterConfirmation()
+        {
+            Confirm();
+            Cancel();
+
+            _sut.State.ShouldBe(RentState.Cancelled);
+        }
+
+        [Fact]
+        public void State_ShouldBeCompleted_IfTheRentIsStopped()
+        {
+            Confirm();
+            Stop();
+
+            _sut.State.ShouldBe(RentState.Completed);
+        }
+
+        [Fact]
+        public void Confirm_ShouldSucceed_IfTheRentIsPending()
+        {
+            Confirm().ShouldBe(Ok);
+        }
+
+        [Fact]
         public void Confirm_ShouldFillTheRentWithConfirmationInfo_IfTheRentIsPending()
         {
-            _sut.Confirm(ConfirmationInfo);
+            Confirm();
 
-            _sut.ConfirmationInfo.ShouldContain(ConfirmationInfo);
+            _sut.ConfirmationInfo.ShouldContain(new RentConfirmationInfo(_timestampProvider.Now));
         }
 
         [Fact]
-        public void Confirm_ShouldReturnOk_IfTheRentIsPending()
+        public void Confirm_ShouldFail_IfTheRentIsOngoing()
         {
-            _sut.Confirm(ConfirmationInfo).ShouldBe(Ok);
+            Confirm();
+
+            Confirm().ShouldBe(new InvalidRentState(RentState.Ongoing));
         }
 
         [Fact]
-        public void Confirm_ShouldFail_IfTheRentIsNotInAPendingState()
+        public void Confirm_ShouldFail_IfTheRentIsCancelled()
         {
-            _sut.Confirm(ConfirmationInfo);
+            Cancel();
 
-            var newConfirmation = ConfirmationInfo with { Timestamp = ConfirmationInfo.Timestamp + TimeOffset.FromSeconds(1) };
-            _sut.Confirm(newConfirmation).ShouldBe(new InvalidRentState(RentState.Ongoing));
+            Confirm().ShouldBe(new InvalidRentState(RentState.Cancelled));
+        }
+
+        [Fact]
+        public void Confirm_ShouldFail_IfTheRentIsCompleted()
+        {
+            Confirm();
+            Stop();
+
+            Confirm().ShouldBe(new InvalidRentState(RentState.Completed));
+        }
+
+        [Fact]
+        public void Cancel_ShouldSucceed_IfTheRentIsPending()
+        {
+            Cancel().ShouldBe(Ok);
+        }
+
+        [Fact]
+        public void Cancel_ShouldFillTheRentWithCancellationInfo_IfTheRentIsPending()
+        {
+            Cancel(RentCancellationReason.CreditInsufficient);
+
+            _sut.CancellationInfo.ShouldContain(new RentCancellationInfo(RentCancellationReason.CreditInsufficient));
+        }
+
+        [Fact]
+        public void Cancel_ShouldFail_IfTheRentIsCancelled()
+        {
+            Cancel();
+
+            Cancel().ShouldBe(new InvalidRentState(RentState.Cancelled));
+        }
+
+        [Fact]
+        public void Cancel_ShouldFail_IfTheRentIsCompleted()
+        {
+            Confirm();
+            Stop();
+
+            Cancel().ShouldBe(new InvalidRentState(RentState.Completed));
+        }
+
+        [Fact]
+        public void Stop_ShouldSucceed_IfTheRentIsOngoing()
+        {
+            Confirm();
+
+            Stop().ShouldBe(Ok);
+        }
+
+        [Fact]
+        public void Stop_ShouldFillTheRentWithStopInfo_IfTheRentIsOngoing()
+        {
+            Confirm();
+            Stop(RentStopReason.StoppedByCustomer);
+
+            _sut.StopInfo.ShouldContain(new RentStopInfo(RentStopReason.StoppedByCustomer, _timestampProvider.Now));
+        }
+
+        [Fact]
+        public void Stop_ShouldFail_IfTheRentIsPending()
+        {
+            Stop().ShouldBe(new InvalidRentState(RentState.Pending));
+        }
+
+        [Fact]
+        public void Stop_ShouldFail_IfTheRentIsCancelled()
+        {
+            Cancel();
+
+            Stop().ShouldBe(new InvalidRentState(RentState.Cancelled));
+        }
+
+        [Fact]
+        public void Stop_ShouldFail_IfTheRentIsCompleted()
+        {
+            Confirm();
+            Stop();
+
+            Stop().ShouldBe(new InvalidRentState(RentState.Completed));
         }
     }
 }
