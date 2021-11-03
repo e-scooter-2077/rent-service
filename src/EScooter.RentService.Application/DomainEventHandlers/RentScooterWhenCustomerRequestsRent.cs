@@ -4,7 +4,7 @@ using EasyDesk.CleanArchitecture.Application.Mediator;
 using EasyDesk.CleanArchitecture.Application.Responses;
 using EasyDesk.CleanArchitecture.Domain.Metamodel.Results;
 using EasyDesk.Tools;
-using EScooter.RentService.Domain.Aggregates.CustomerAggregate;
+using EScooter.RentService.Domain.Aggregates.RentAggregate;
 using EScooter.RentService.Domain.Aggregates.ScooterAggregate;
 using System.Threading.Tasks;
 
@@ -33,7 +33,7 @@ namespace EScooter.RentService.Application.DomainEventHandlers
         protected override async Task<Response<Nothing>> Handle(RentRequestedEvent ev)
         {
             return await _scooterRepository.GetById(ev.Rent.ScooterId)
-                .ThenRequire(scooter => scooter.Rent(ev.Customer.Id))
+                .ThenRequire(scooter => scooter.Rent(ev.Rent.CustomerId))
                 .ThenIfSuccess(_scooterRepository.Save)
                 .ThenToResponse();
         }

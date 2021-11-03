@@ -94,7 +94,17 @@ namespace EScooter.RentService.Domain.Aggregates.ScooterAggregate
         /// or with an <see cref="AlreadyRented"/> error if it is already rented by a customer.
         /// </summary>
         /// <param name="customerId">The customer Id.</param>
-        /// <returns>A result that indicates whether the operation was successful.</returns>
+        /// <returns>
+        /// <para>
+        ///     <see cref="NotRentable"/>: if this scooter is currently not rentable.
+        /// </para>
+        /// <para>
+        ///     <see cref="AlreadyRented"/>: if it is already rented by a customer.
+        /// </para>
+        /// <para>
+        ///     <see cref="Ok"/>: otherwise.
+        /// </para>
+        /// </returns>
         public Result<Nothing> Rent(Guid customerId)
         {
             return RequireRentablility()

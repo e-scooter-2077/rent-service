@@ -5,7 +5,7 @@ using EasyDesk.CleanArchitecture.Application.Mediator;
 using EasyDesk.CleanArchitecture.Application.Responses;
 using EasyDesk.CleanArchitecture.Domain.Metamodel.Results;
 using EasyDesk.Tools;
-using EScooter.RentService.Domain.Aggregates.CustomerAggregate;
+using EScooter.RentService.Domain.Aggregates.RentAggregate;
 using System;
 using System.Threading.Tasks;
 
@@ -23,26 +23,26 @@ namespace EScooter.RentService.Application.ExternalEventHandlers.RentPaymentMana
     /// </summary>
     public class CancelRentWhenPaymentIsDenied : ExternalEventHandlerBase<RentPaymentDenied>
     {
-        private readonly ICustomerRepository _customerRepository;
+        private readonly IRentRepository _rentRepository;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CancelRentWhenPaymentIsDenied"/> class.
         /// </summary>
-        /// <param name="customerRepository">The customer repository.</param>
+        /// <param name="rentRepository">The rent repository.</param>
         /// <param name="unitOfWork">The unit of work.</param>
         public CancelRentWhenPaymentIsDenied(
-            ICustomerRepository customerRepository,
+            IRentRepository rentRepository,
             IUnitOfWork unitOfWork) : base(unitOfWork)
         {
-            _customerRepository = customerRepository;
+            _rentRepository = rentRepository;
         }
 
         /// <inheritdoc/>
         protected override async Task<Response<Nothing>> Handle(RentPaymentDenied ev)
         {
-            return await _customerRepository.GetByRent(ev.RentId)
-                .ThenRequire(customer => customer.CancelOngoingRent(new(RentCancellationReason.CreditInsufficient)))
-                .ThenIfSuccess(_customerRepository.Save)
+            return await _rentRepository.GetById(ev.RentId)
+                .ThenRequire(rent => rent.Cancel(new(RentCancellationReason.CreditInsufficient)))
+                .ThenIfSuccess(_rentRepository.Save)
                 .ThenToResponse();
         }
     }

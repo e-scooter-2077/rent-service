@@ -6,7 +6,7 @@ using EasyDesk.CleanArchitecture.Application.Responses;
 using EasyDesk.CleanArchitecture.Domain.Metamodel.Results;
 using EasyDesk.CleanArchitecture.Domain.Time;
 using EasyDesk.Tools;
-using EScooter.RentService.Domain.Aggregates.CustomerAggregate;
+using EScooter.RentService.Domain.Aggregates.RentAggregate;
 using System;
 using System.Threading.Tasks;
 
@@ -24,30 +24,30 @@ namespace EScooter.RentService.Application.ExternalEventHandlers.RentPaymentMana
     /// </summary>
     public class ConfirmRentWhenPaymentIsAuthorized : ExternalEventHandlerBase<RentPaymentAuthorized>
     {
-        private readonly ICustomerRepository _customerRepository;
+        private readonly IRentRepository _rentRepository;
         private readonly ITimestampProvider _timestampProvider;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ConfirmRentWhenPaymentIsAuthorized"/> class.
         /// </summary>
-        /// <param name="customerRepository">The customer repository.</param>
+        /// <param name="rentRepository">The rent repository.</param>
         /// <param name="timestampProvider">The timestamp provider.</param>
         /// <param name="unitOfWork">The unit of work.</param>
         public ConfirmRentWhenPaymentIsAuthorized(
-            ICustomerRepository customerRepository,
+            IRentRepository rentRepository,
             ITimestampProvider timestampProvider,
             IUnitOfWork unitOfWork) : base(unitOfWork)
         {
-            _customerRepository = customerRepository;
+            _rentRepository = rentRepository;
             _timestampProvider = timestampProvider;
         }
 
         /// <inheritdoc/>
         protected override async Task<Response<Nothing>> Handle(RentPaymentAuthorized ev)
         {
-            return await _customerRepository.GetByRent(ev.RentId)
-                .ThenRequire(customer => customer.ConfirmOngoingRent(new(_timestampProvider.Now)))
-                .ThenIfSuccess(_customerRepository.Save)
+            return await _rentRepository.GetById(ev.RentId)
+                .ThenRequire(rent => rent.Confirm(new(_timestampProvider.Now)))
+                .ThenIfSuccess(_rentRepository.Save)
                 .ThenToResponse();
         }
     }

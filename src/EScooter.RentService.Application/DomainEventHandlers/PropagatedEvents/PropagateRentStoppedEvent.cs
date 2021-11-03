@@ -1,7 +1,7 @@
 ﻿using EasyDesk.CleanArchitecture.Application.Events.ExternalEvents;
 using EasyDesk.CleanArchitecture.Application.Mediator;
 using EasyDesk.Tools.PrimitiveTypes.DateAndTime;
-using EScooter.RentService.Domain.Aggregates.CustomerAggregate;
+using EScooter.RentService.Domain.Aggregates.RentAggregate;
 using System;
 
 namespace EScooter.RentService.Application.DomainEventHandlers.PropagatedEvents
@@ -38,7 +38,7 @@ namespace EScooter.RentService.Application.DomainEventHandlers.PropagatedEvents
         protected override ExternalEvent ConvertToExternalEvent(RentStoppedEvent ev) =>
             new RentStopped(
                 ev.Rent.Id,
-                ev.Customer.Id,
+                ev.Rent.CustomerId,
                 ev.Rent.ScooterId,
                 ev.StopInfo.Timestamp,
                 ev.StopInfo.Reason.ToString());

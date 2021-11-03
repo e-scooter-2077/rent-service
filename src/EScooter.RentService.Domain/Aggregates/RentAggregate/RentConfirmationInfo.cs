@@ -1,6 +1,6 @@
 ﻿using EasyDesk.Tools.PrimitiveTypes.DateAndTime;
 
-namespace EScooter.RentService.Domain.Aggregates.CustomerAggregate
+namespace EScooter.RentService.Domain.Aggregates.RentAggregate
 {
     /// <summary>
     /// Contains information about the confirmation of a rent.

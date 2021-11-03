@@ -1,8 +1,8 @@
-﻿using EScooter.RentService.Domain.Aggregates.CustomerAggregate;
+﻿using EScooter.RentService.Domain.Aggregates.RentAggregate;
 using System;
 using static EasyDesk.Tools.Functions;
 
-namespace EScooter.RentService.Domain.Aggregates.PastRentAggregate
+namespace EScooter.RentService.Domain.Aggregates.RentAggregate
 {
     /// <summary>
     /// Represents one of the possible ways in which a rent can end, either by correct completion or by cancellation.
