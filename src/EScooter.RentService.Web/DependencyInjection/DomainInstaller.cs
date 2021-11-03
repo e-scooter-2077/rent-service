@@ -2,10 +2,10 @@
 using EScooter.RentService.Domain.Aggregates.CustomerAggregate;
 using EScooter.RentService.Domain.Aggregates.RentAggregate;
 using EScooter.RentService.Domain.Aggregates.ScooterAggregate;
+using EScooter.RentService.Infrastructure.DataAccess.Repositories;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System;
 
 namespace EScooter.RentService.Web.DependencyInjection
 {
@@ -17,9 +17,9 @@ namespace EScooter.RentService.Web.DependencyInjection
         /// <inheritdoc/>
         public void InstallServices(IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
         {
-            services.AddScoped<ICustomerRepository>(_ => throw new NotImplementedException());
-            services.AddScoped<IScooterRepository>(_ => throw new NotImplementedException());
-            services.AddScoped<IRentRepository>(_ => throw new NotImplementedException());
+            services.AddScoped<ICustomerRepository, EfCoreCustomerRepository>();
+            services.AddScoped<IScooterRepository, EfCoreScooterRepository>();
+            services.AddScoped<IRentRepository, EfCoreRentRepository>();
         }
     }
 }
