@@ -9,7 +9,7 @@ namespace EScooter.RentService.UnitTests.Domain.Aggregates.ScooterAggregate
     public class ScooterTests
     {
         private readonly Scooter _sut;
-        private readonly Guid _customerId = Guid.NewGuid();
+        private readonly Guid _rentId = Guid.NewGuid();
 
         public ScooterTests()
         {
@@ -20,7 +20,7 @@ namespace EScooter.RentService.UnitTests.Domain.Aggregates.ScooterAggregate
         public void Create_ShouldReturnAScooterInTheDefaultState()
         {
             _sut.ShouldSatisfyAllConditions(
-                scooter => scooter.RentingCustomerId.ShouldBeEmpty(),
+                scooter => scooter.OngoingRentId.ShouldBeEmpty(),
                 scooter => scooter.IsEnabled.ShouldBeTrue(),
                 scooter => scooter.IsInStandby.ShouldBeFalse(),
                 scooter => scooter.IsOutOfService.ShouldBeFalse());
@@ -80,23 +80,23 @@ namespace EScooter.RentService.UnitTests.Domain.Aggregates.ScooterAggregate
         [Fact]
         public void Rent_SetTheScooterAsRented_IfTheScooterIsRentableAndAvailable()
         {
-            _sut.Rent(_customerId);
+            _sut.Rent(_rentId);
 
-            _sut.RentingCustomerId.ShouldBe(_customerId);
+            _sut.OngoingRentId.ShouldBe(_rentId);
         }
 
         [Fact]
         public void Rent_ShouldReturnOk_IfTheScooterIsRentableAndAvailable()
         {
-            _sut.Rent(_customerId).ShouldBe(Ok);
+            _sut.Rent(_rentId).ShouldBe(Ok);
         }
 
         [Fact]
         public void Rent_ShouldFail_IfTheScooterIsAlreadyRented()
         {
-            _sut.Rent(_customerId);
+            _sut.Rent(_rentId);
 
-            _sut.Rent(customerId: Guid.NewGuid()).ShouldBe(new AlreadyRented());
+            _sut.Rent(Guid.NewGuid()).ShouldBe(new AlreadyRented());
         }
 
         [Fact]
@@ -104,7 +104,7 @@ namespace EScooter.RentService.UnitTests.Domain.Aggregates.ScooterAggregate
         {
             _sut.Disable();
 
-            _sut.Rent(_customerId).ShouldBe(new NotRentable());
+            _sut.Rent(_rentId).ShouldBe(new NotRentable());
         }
 
         [Fact]
@@ -112,7 +112,7 @@ namespace EScooter.RentService.UnitTests.Domain.Aggregates.ScooterAggregate
         {
             _sut.LeaveAreaOfService();
 
-            _sut.Rent(_customerId).ShouldBe(new NotRentable());
+            _sut.Rent(_rentId).ShouldBe(new NotRentable());
         }
 
         [Fact]
@@ -120,17 +120,17 @@ namespace EScooter.RentService.UnitTests.Domain.Aggregates.ScooterAggregate
         {
             _sut.EnterStandby();
 
-            _sut.Rent(_customerId).ShouldBe(new NotRentable());
+            _sut.Rent(_rentId).ShouldBe(new NotRentable());
         }
 
         [Fact]
         public void ClearRent_ShouldMakeTheScooterAvailable()
         {
-            _sut.Rent(_customerId);
+            _sut.Rent(_rentId);
 
             _sut.ClearRent();
 
-            _sut.RentingCustomerId.ShouldBeEmpty();
+            _sut.OngoingRentId.ShouldBeEmpty();
         }
     }
 }
