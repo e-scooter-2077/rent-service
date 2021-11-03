@@ -1,4 +1,5 @@
 ﻿using EasyDesk.CleanArchitecture.Dal.EfCore.Entities;
+using EScooter.RentService.Infrastructure.DataAccess.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace EScooter.RentService.Infrastructure.DataAccess
@@ -15,6 +16,21 @@ namespace EScooter.RentService.Infrastructure.DataAccess
         public RentDbContext(DbContextOptions<RentDbContext> options) : base(options)
         {
         }
+
+        /// <summary>
+        /// The table containing rents.
+        /// </summary>
+        public DbSet<RentModel> Rents { get; set; }
+
+        /// <summary>
+        /// The table containing customers.
+        /// </summary>
+        public DbSet<CustomerModel> Customers { get; set; }
+
+        /// <summary>
+        /// The table containing scooters.
+        /// </summary>
+        public DbSet<ScooterModel> Scooters { get; set; }
 
         /// <inheritdoc/>
         protected override void OnModelCreating(ModelBuilder modelBuilder)
