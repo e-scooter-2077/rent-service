@@ -99,26 +99,6 @@ namespace EScooter.RentService.Infrastructure.DataAccess.Migrations
                 column: "OngoingRentId",
                 unique: true,
                 filter: "[OngoingRentId] IS NOT NULL");
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Rents_Customers_CustomerId",
-                schema: "entities",
-                table: "Rents",
-                column: "CustomerId",
-                principalSchema: "entities",
-                principalTable: "Customers",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Rents_Scooters_ScooterId",
-                schema: "entities",
-                table: "Rents",
-                column: "ScooterId",
-                principalSchema: "entities",
-                principalTable: "Scooters",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
