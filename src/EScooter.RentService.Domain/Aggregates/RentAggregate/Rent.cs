@@ -141,7 +141,11 @@ namespace EScooter.RentService.Domain.Aggregates.RentAggregate
         public Result<Nothing> Confirm(RentConfirmationInfo confirmationInfo)
         {
             return RequireState(RentState.Pending)
-                .IfSuccess(_ => ConfirmationInfo = confirmationInfo);
+                .IfSuccess(_ =>
+                {
+                    ConfirmationInfo = confirmationInfo;
+                    EmitEvent(new RentConfirmedEvent(this, confirmationInfo));
+                });
         }
 
         /// <summary>
@@ -159,7 +163,12 @@ namespace EScooter.RentService.Domain.Aggregates.RentAggregate
         public Result<Nothing> Cancel(RentCancellationInfo cancellationInfo)
         {
             return RequireState(RentState.Pending, RentState.Ongoing)
-                .IfSuccess(_ => CancellationInfo = cancellationInfo);
+                .IfSuccess(_ =>
+                {
+                    CancellationInfo = cancellationInfo;
+                    EmitEvent(new RentCancelledEvent(this, cancellationInfo));
+                    EmitEvent(new RentEndedEvent(this));
+                });
         }
 
         /// <summary>
@@ -178,7 +187,12 @@ namespace EScooter.RentService.Domain.Aggregates.RentAggregate
         public Result<Nothing> Stop(RentStopInfo stopInfo)
         {
             return RequireState(RentState.Ongoing)
-                .IfSuccess(_ => StopInfo = stopInfo);
+                .IfSuccess(_ =>
+                {
+                    StopInfo = stopInfo;
+                    EmitEvent(new RentStoppedEvent(this, stopInfo));
+                    EmitEvent(new RentEndedEvent(this));
+                });
         }
 
         private Result<Nothing> RequireState(params RentState[] possibleStates)
