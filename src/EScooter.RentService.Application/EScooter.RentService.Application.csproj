@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="EasyDesk.CleanArchitecture.Application" Version="0.21.0" />
+    <PackageReference Include="EasyDesk.CleanArchitecture.Application" Version="0.23.1" />
   </ItemGroup>
 
   <ItemGroup>

@@ -4,13 +4,13 @@
     ".NETCoreApp,Version=v5.0": {
       "EasyDesk.CleanArchitecture.Application": {
         "type": "Direct",
-        "requested": "[0.21.0, )",
-        "resolved": "0.21.0",
-        "contentHash": "fPtb3wE/uk5pgzFfV87fFxYN8cKNL2pnpdRZ0opbxeB2V8h61Ylc40vmGkUjxA7cvky5T9I0RczML69vyfEJCg==",
+        "requested": "[0.23.1, )",
+        "resolved": "0.23.1",
+        "contentHash": "sREKICSBqgUCFBDZm6O9qhgF07qvEguWa8e+lC5sOKcfwJdftYoSDfSXMHS13pOH2wN0x5vfXTyJWSVYalFz7A==",
         "dependencies": {
           "AutoMapper": "10.1.1",
-          "EasyDesk.CleanArchitecture.Domain": "0.21.0",
-          "EasyDesk.Tools": "1.3.2",
+          "EasyDesk.CleanArchitecture.Domain": "0.23.1",
+          "EasyDesk.Tools": "2.0.0",
           "FluentValidation": "10.3.3",
           "MediatR": "9.0.0",
           "Microsoft.Extensions.Hosting.Abstractions": "5.0.0",
@@ -37,16 +37,16 @@
       },
       "EasyDesk.CleanArchitecture.Domain": {
         "type": "Transitive",
-        "resolved": "0.21.0",
-        "contentHash": "RBV3e7KULbBJ6OcY0/Mc2TalbCN53YdHAetoYqKaswFtaoiK1P6bd23rCjae1LbnoxYOPn5Q8S228d0j6rOBEA==",
+        "resolved": "0.23.1",
+        "contentHash": "Dae6ynugb6A4803v7KieaPTWZwZaXje/pFg73vfoWb2V0Bz1k1PzItnjM4J0EeaUbICmacqzXQGUzecYr+KD3w==",
         "dependencies": {
-          "EasyDesk.Tools": "1.3.2"
+          "EasyDesk.Tools": "2.0.0"
         }
       },
       "EasyDesk.Tools": {
         "type": "Transitive",
-        "resolved": "1.3.2",
-        "contentHash": "E/4Kq8Xic8R6l8Z9PSNABVqh1k7JjclQV72BcmlRbjTlcWRh1iMBNw/gQXgBkKF/j1uIy5PJFZmoYyCvVmArZg=="
+        "resolved": "2.0.0",
+        "contentHash": "/+d4APsx/b7xbYd62JkGRnqTRZEssXcWd4W+ghUcXl0E8uWp0yJNeK0mVfARMBmROdgLC0Lu6Jb+oOaofjyGAg=="
       },
       "FluentValidation": {
         "type": "Transitive",
@@ -117,7 +117,7 @@
       "escooter.rentservice.domain": {
         "type": "Project",
         "dependencies": {
-          "EasyDesk.CleanArchitecture.Domain": "0.21.0"
+          "EasyDesk.CleanArchitecture.Domain": "0.23.1"
         }
       }
     }

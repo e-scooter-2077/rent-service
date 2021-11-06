@@ -13,16 +13,16 @@ namespace EScooter.RentService.Application.DomainEventHandlers
     /// <summary>
     /// A domain event handler that marks a scooter as rented whenever a customer requests a rent.
     /// </summary>
-    public class RentScooterWhenCustomerRequestsRent : DomainEventHandlerBase<RentRequestedEvent>
+    public class RentScooterWhenRentIsRequested : DomainEventHandlerBase<RentRequestedEvent>
     {
         private readonly IScooterRepository _scooterRepository;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="RentScooterWhenCustomerRequestsRent"/> class.
+        /// Initializes a new instance of the <see cref="RentScooterWhenRentIsRequested"/> class.
         /// </summary>
         /// <param name="scooterRepository">The customer repository.</param>
         /// <param name="unitOfWork">The unit of work.</param>
-        public RentScooterWhenCustomerRequestsRent(
+        public RentScooterWhenRentIsRequested(
             IScooterRepository scooterRepository,
             IUnitOfWork unitOfWork) : base(unitOfWork)
         {
@@ -33,7 +33,7 @@ namespace EScooter.RentService.Application.DomainEventHandlers
         protected override async Task<Response<Nothing>> Handle(RentRequestedEvent ev)
         {
             return await _scooterRepository.GetById(ev.Rent.ScooterId)
-                .ThenRequire(scooter => scooter.Rent(ev.Rent.CustomerId))
+                .ThenRequire(scooter => scooter.Rent(ev.Rent.Id))
                 .ThenIfSuccess(_scooterRepository.Save)
                 .ThenToResponse();
         }
