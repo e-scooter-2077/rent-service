@@ -47,7 +47,7 @@ namespace EScooter.RentService.UnitTests.Infrastructure.Converters
         public void ToDomain_ShouldCopyCancellationInfo_IfPresent()
         {
             var cancellationReason = RentCancellationReason.CreditInsufficient;
-            _persistenceModel.CancellationReason = cancellationReason.ToString();
+            _persistenceModel.CancellationReason = cancellationReason;
 
             _sut.ToDomain(_persistenceModel).CancellationInfo.ShouldContain(new RentCancellationInfo(cancellationReason));
         }
@@ -58,7 +58,7 @@ namespace EScooter.RentService.UnitTests.Infrastructure.Converters
             var stopReason = RentStopReason.StoppedByCustomer;
             var confirmationTimestamp = Timestamp.Now;
             var stopTimestamp = confirmationTimestamp + TimeOffset.FromMinutes(10);
-            _persistenceModel.StopReason = stopReason.ToString();
+            _persistenceModel.StopReason = stopReason;
             _persistenceModel.ConfirmationTimestamp = confirmationTimestamp;
             _persistenceModel.StopTimestamp = stopTimestamp;
 
@@ -100,7 +100,7 @@ namespace EScooter.RentService.UnitTests.Infrastructure.Converters
 
             _sut.ApplyChanges(_domainModel, _persistenceModel);
 
-            _persistenceModel.CancellationReason.ShouldBe(cancellationReason.ToString());
+            _persistenceModel.CancellationReason.ShouldBe(cancellationReason);
         }
 
         [Fact]
@@ -115,7 +115,7 @@ namespace EScooter.RentService.UnitTests.Infrastructure.Converters
             _sut.ApplyChanges(_domainModel, _persistenceModel);
 
             _persistenceModel.ShouldSatisfyAllConditions(
-                rent => rent.StopReason.ShouldBe(stopReason.ToString()),
+                rent => rent.StopReason.ShouldBe(stopReason),
                 rent => rent.StopTimestamp.ShouldBe(stopTimestamp));
         }
     }

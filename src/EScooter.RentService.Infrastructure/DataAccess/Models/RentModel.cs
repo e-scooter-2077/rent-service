@@ -1,6 +1,8 @@
 ﻿using EasyDesk.Tools.PrimitiveTypes.DateAndTime;
+using EScooter.RentService.Domain.Aggregates.RentAggregate;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using System;
 
 namespace EScooter.RentService.Infrastructure.DataAccess.Models
@@ -19,9 +21,9 @@ namespace EScooter.RentService.Infrastructure.DataAccess.Models
 
         public Timestamp StopTimestamp { get; set; }
 
-        public string StopReason { get; set; }
+        public RentStopReason? StopReason { get; set; }
 
-        public string CancellationReason { get; set; }
+        public RentCancellationReason? CancellationReason { get; set; }
 
         public CustomerModel Customer { get; set; }
 
@@ -35,6 +37,12 @@ namespace EScooter.RentService.Infrastructure.DataAccess.Models
 
                 builder.Property(x => x.RequestTimestamp)
                     .IsRequired();
+
+                builder.Property(x => x.StopReason)
+                    .HasConversion(new EnumToStringConverter<RentStopReason>());
+
+                builder.Property(x => x.CancellationReason)
+                    .HasConversion(new EnumToStringConverter<RentCancellationReason>());
 
                 builder.HasOne(x => x.Customer)
                     .WithMany(x => x.Rents)
