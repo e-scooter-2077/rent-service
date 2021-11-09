@@ -1,6 +1,7 @@
 ﻿using System;
 using EasyDesk.CleanArchitecture.Domain.Metamodel.Results;
 using EasyDesk.CleanArchitecture.Testing;
+using EasyDesk.CleanArchitecture.Testing.Domain;
 using EasyDesk.Tools;
 using EasyDesk.Tools.PrimitiveTypes.DateAndTime;
 using EScooter.RentService.Domain.Aggregates.RentAggregate;
@@ -48,6 +49,12 @@ namespace EScooter.RentService.UnitTests.Domain.Aggregates.RentAggregate
                 rent => rent.CancellationInfo.ShouldBeEmpty(),
                 rent => rent.StopInfo.ShouldBeEmpty(),
                 rent => rent.RequestTimestamp.ShouldBe(RequestTimestamp));
+        }
+
+        [Fact]
+        public void Create_ShouldEmitAnEvent()
+        {
+            _sut.ShouldHaveEmitted(new RentRequestedEvent(_sut));
         }
 
         [Fact]
@@ -105,6 +112,14 @@ namespace EScooter.RentService.UnitTests.Domain.Aggregates.RentAggregate
         }
 
         [Fact]
+        public void Confirm_ShouldEmitAnEvent_IfTheRentIsPending()
+        {
+            Confirm();
+
+            _sut.ShouldHaveEmitted(new RentConfirmedEvent(_sut, new RentConfirmationInfo(_timestampProvider.Now)));
+        }
+
+        [Fact]
         public void Confirm_ShouldFail_IfTheRentIsOngoing()
         {
             Confirm();
@@ -138,9 +153,20 @@ namespace EScooter.RentService.UnitTests.Domain.Aggregates.RentAggregate
         [Fact]
         public void Cancel_ShouldFillTheRentWithCancellationInfo_IfTheRentIsPending()
         {
-            Cancel(RentCancellationReason.CreditInsufficient);
+            var reason = RentCancellationReason.CreditInsufficient;
+            Cancel(reason);
 
-            _sut.CancellationInfo.ShouldContain(new RentCancellationInfo(RentCancellationReason.CreditInsufficient));
+            _sut.CancellationInfo.ShouldContain(new RentCancellationInfo(reason));
+        }
+
+        [Fact]
+        public void Cancel_ShouldEmitAnEvent_IfTheRentIsPending()
+        {
+            var reason = RentCancellationReason.CreditInsufficient;
+            Cancel(reason);
+
+            _sut.ShouldHaveEmitted(new RentCancelledEvent(_sut, new(reason)));
+            _sut.ShouldHaveEmitted(new RentEndedEvent(_sut));
         }
 
         [Fact]
@@ -172,9 +198,21 @@ namespace EScooter.RentService.UnitTests.Domain.Aggregates.RentAggregate
         public void Stop_ShouldFillTheRentWithStopInfo_IfTheRentIsOngoing()
         {
             Confirm();
-            Stop(RentStopReason.StoppedByCustomer);
+            var reason = RentStopReason.StoppedByCustomer;
+            Stop(reason);
 
-            _sut.StopInfo.ShouldContain(new RentStopInfo(RentStopReason.StoppedByCustomer, _timestampProvider.Now));
+            _sut.StopInfo.ShouldContain(new RentStopInfo(reason, _timestampProvider.Now));
+        }
+
+        [Fact]
+        public void Stop_ShouldEmitAnEvent_IfTheRentIsOngoing()
+        {
+            Confirm();
+            var reason = RentStopReason.StoppedByCustomer;
+            Stop(reason);
+
+            _sut.ShouldHaveEmitted(new RentStoppedEvent(_sut, new(reason, _timestampProvider.Now)));
+            _sut.ShouldHaveEmitted(new RentEndedEvent(_sut));
         }
 
         [Fact]
