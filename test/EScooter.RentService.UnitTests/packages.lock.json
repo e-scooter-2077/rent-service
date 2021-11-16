@@ -10,12 +10,12 @@
       },
       "EasyDesk.CleanArchitecture.Testing": {
         "type": "Direct",
-        "requested": "[0.23.1, )",
-        "resolved": "0.23.1",
-        "contentHash": "Dgg+wXB7/8kNlhbSeZrGVpmSTnVleB1BO+gPVW6lTVFRtGRbfSPAyzodBy0M149yz8ecUKq7QaODad8LJDW/Xw==",
+        "requested": "[0.24.0, )",
+        "resolved": "0.24.0",
+        "contentHash": "TIi/EEkoOXGhqxeha4ng/aVnavxlW4D8ZhbnjBQbH4t2w3nW2xORd5PfNsRuSq1L47jaPiUVgNT40vWffWqaVQ==",
         "dependencies": {
-          "EasyDesk.CleanArchitecture.Application": "0.23.1",
-          "EasyDesk.CleanArchitecture.Infrastructure": "0.23.1",
+          "EasyDesk.CleanArchitecture.Application": "0.24.0",
+          "EasyDesk.CleanArchitecture.Infrastructure": "0.24.0",
           "EasyDesk.Testing": "0.3.1",
           "EasyDesk.Tools": "2.0.0",
           "NSubstitute": "4.2.2",
@@ -151,11 +151,11 @@
       },
       "EasyDesk.CleanArchitecture.Application": {
         "type": "Transitive",
-        "resolved": "0.23.1",
-        "contentHash": "sREKICSBqgUCFBDZm6O9qhgF07qvEguWa8e+lC5sOKcfwJdftYoSDfSXMHS13pOH2wN0x5vfXTyJWSVYalFz7A==",
+        "resolved": "0.24.0",
+        "contentHash": "voFnbbwEe7KXtzQk/jg4nq0V/EkIqhmEhCPG+ZID8mpg5d4eSoO/LXl4lKwbVrLx6rD9cQa9Q2tuIx9IZe6ESA==",
         "dependencies": {
           "AutoMapper": "10.1.1",
-          "EasyDesk.CleanArchitecture.Domain": "0.23.1",
+          "EasyDesk.CleanArchitecture.Domain": "0.24.0",
           "EasyDesk.Tools": "2.0.0",
           "FluentValidation": "10.3.3",
           "MediatR": "9.0.0",
@@ -165,11 +165,11 @@
       },
       "EasyDesk.CleanArchitecture.Dal.EfCore": {
         "type": "Transitive",
-        "resolved": "0.23.1",
-        "contentHash": "VUut13Djkk1uwW3ZX3ieltqji885iwtSwtkHSQzAR3NR3cL5EKAF/SvZhDi62iiVnzqDwr/EYEXrAIfUnQc4Qg==",
+        "resolved": "0.24.0",
+        "contentHash": "aFYEkyzH8/ZJG6ZuTOwNzjnuytu3dehTHBROi18Nn21ujUG+MZ4dhX801AgiNt5M/03WElCaGLjR+5Hk1CHM9w==",
         "dependencies": {
-          "EasyDesk.CleanArchitecture.Application": "0.23.1",
-          "EasyDesk.CleanArchitecture.Infrastructure": "0.23.1",
+          "EasyDesk.CleanArchitecture.Application": "0.24.0",
+          "EasyDesk.CleanArchitecture.Infrastructure": "0.24.0",
           "EasyDesk.Tools": "2.0.0",
           "Microsoft.EntityFrameworkCore.Relational": "5.0.10",
           "Microsoft.EntityFrameworkCore.SqlServer": "5.0.10"
@@ -177,19 +177,19 @@
       },
       "EasyDesk.CleanArchitecture.Domain": {
         "type": "Transitive",
-        "resolved": "0.23.1",
-        "contentHash": "Dae6ynugb6A4803v7KieaPTWZwZaXje/pFg73vfoWb2V0Bz1k1PzItnjM4J0EeaUbICmacqzXQGUzecYr+KD3w==",
+        "resolved": "0.24.0",
+        "contentHash": "qq7LxishGjHxIh4z4jJCjUleXY8/gf0pjfiNvdIFDYejOuuLDw5ZXA1apKlr34gF/7Wh4MWDS98BUVBZJzqcRw==",
         "dependencies": {
           "EasyDesk.Tools": "2.0.0"
         }
       },
       "EasyDesk.CleanArchitecture.Infrastructure": {
         "type": "Transitive",
-        "resolved": "0.23.1",
-        "contentHash": "avinZYy24hJMgPWzKPI4Zrw380eSkCIV6oCEhlLVUu3Pveo3011SutU9sXBmNjn8RutfdAupzGSUjQUHv7mFfQ==",
+        "resolved": "0.24.0",
+        "contentHash": "/XdSxO2qJDaSvguNUrIMp8cYkKXffRki6sh+Jide0iedUesqXPB06bmiJUlgX9ShBmzYeeaQWhNFG/T5Z5s8Ig==",
         "dependencies": {
           "Azure.Messaging.ServiceBus": "7.4.0",
-          "EasyDesk.CleanArchitecture.Application": "0.23.1",
+          "EasyDesk.CleanArchitecture.Application": "0.24.0",
           "EasyDesk.Tools": "2.0.0",
           "Microsoft.AspNet.WebApi.Client": "5.2.7",
           "Microsoft.AspNetCore.Authentication.JwtBearer": "5.0.10",
@@ -200,11 +200,11 @@
       },
       "EasyDesk.CleanArchitecture.Web": {
         "type": "Transitive",
-        "resolved": "0.23.1",
-        "contentHash": "QY8gKtcGoMti53Ux1li0Gq/yVhoxBVb6rs3I2rqckEvo7LfzNrqCybGZE9jlAQj/Cqm8tqxYI6mj+VyuyzlDMA==",
+        "resolved": "0.24.0",
+        "contentHash": "RHLH/THzjDc98CPXDm1bqroG6pzap+mSiekBr8lapEiQSwRgm33FYsZSpfvQV7KLVIZIlIAU76AxU0Ki6AUkzQ==",
         "dependencies": {
           "AutoMapper.Extensions.Microsoft.DependencyInjection": "8.1.1",
-          "EasyDesk.CleanArchitecture.Infrastructure": "0.23.1",
+          "EasyDesk.CleanArchitecture.Infrastructure": "0.24.0",
           "EasyDesk.Tools": "2.0.0",
           "FluentValidation.AspNetCore": "10.3.3",
           "MediatR.Extensions.Microsoft.DependencyInjection": "9.0.0",
@@ -2463,13 +2463,13 @@
         "type": "Project",
         "dependencies": {
           "EScooter.RentService.Domain": "1.0.0",
-          "EasyDesk.CleanArchitecture.Application": "0.23.1"
+          "EasyDesk.CleanArchitecture.Application": "0.24.0"
         }
       },
       "escooter.rentservice.domain": {
         "type": "Project",
         "dependencies": {
-          "EasyDesk.CleanArchitecture.Domain": "0.23.1"
+          "EasyDesk.CleanArchitecture.Domain": "0.24.0"
         }
       },
       "escooter.rentservice.infrastructure": {
@@ -2477,8 +2477,8 @@
         "dependencies": {
           "EScooter.RentService.Application": "1.0.0",
           "EScooter.RentService.Domain": "1.0.0",
-          "EasyDesk.CleanArchitecture.Dal.EfCore": "0.23.1",
-          "EasyDesk.CleanArchitecture.Infrastructure": "0.23.1"
+          "EasyDesk.CleanArchitecture.Dal.EfCore": "0.24.0",
+          "EasyDesk.CleanArchitecture.Infrastructure": "0.24.0"
         }
       },
       "escooter.rentservice.web": {
@@ -2486,7 +2486,7 @@
         "dependencies": {
           "EScooter.RentService.Application": "1.0.0",
           "EScooter.RentService.Infrastructure": "1.0.0",
-          "EasyDesk.CleanArchitecture.Web": "0.23.1",
+          "EasyDesk.CleanArchitecture.Web": "0.24.0",
           "Microsoft.VisualStudio.Azure.Containers.Tools.Targets": "1.11.1"
         }
       }
