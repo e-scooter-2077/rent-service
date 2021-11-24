@@ -6,6 +6,7 @@ using EasyDesk.CleanArchitecture.Application.Pages;
 using EasyDesk.CleanArchitecture.Application.Responses;
 using EasyDesk.CleanArchitecture.Dal.EfCore.Utils;
 using EasyDesk.Tools.Options;
+using EScooter.RentService.Application.Queries;
 using EScooter.RentService.Domain.Aggregates.RentAggregate;
 using EScooter.RentService.Infrastructure.DataAccess.Models;
 using System.Linq;

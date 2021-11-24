@@ -24,7 +24,7 @@ namespace EScooter.RentService.Web.Controllers.V_1_0
         RentCancellationInfo CancellationInfo,
         RentStopInfo StopInfo)
     {
-        public class MappingFromRentSnapshot : DirectMapping<GetRents.RentSnapshot, RentDto>
+        public class MappingFromRentSnapshot : DirectMapping<RentSnapshot, RentDto>
         {
             public MappingFromRentSnapshot() : base(src => new(
                 src.Id,
@@ -53,7 +53,16 @@ namespace EScooter.RentService.Web.Controllers.V_1_0
                 Mapper.Map<Pagination>(pagination));
             return await Query(query)
                 .ReturnOk()
-                .MapToMany<GetRents.RentSnapshot, RentDto>();
+                .MapToMany<RentSnapshot, RentDto>();
+        }
+
+        [HttpGet("rents/{rentId}")]
+        public async Task<IActionResult> GetRent([FromRoute] Guid rentId)
+        {
+            var query = new GetRent.Query(rentId);
+            return await Query(query)
+                .ReturnOk()
+                .MapTo<RentSnapshot, RentDto>();
         }
 
         [HttpPost("rents")]
@@ -62,7 +71,7 @@ namespace EScooter.RentService.Web.Controllers.V_1_0
             var command = new RequestRent.Command(body.CustomerId, body.ScooterId);
             return await Command(command)
                 .ReturnOk()
-                .MapEmpty();
+                .MapTo<RentSnapshot, RentDto>();
         }
 
         [HttpPost("rents/{rentId}/stop")]

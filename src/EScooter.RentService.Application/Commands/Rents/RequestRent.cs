@@ -2,11 +2,10 @@
 using EasyDesk.CleanArchitecture.Application.Mediator;
 using EasyDesk.CleanArchitecture.Application.Responses;
 using EasyDesk.CleanArchitecture.Domain.Time;
-using EasyDesk.Tools;
+using EScooter.RentService.Application.Queries;
 using EScooter.RentService.Domain.Aggregates.RentAggregate;
 using System;
 using System.Threading.Tasks;
-using static EasyDesk.CleanArchitecture.Application.Responses.ResponseImports;
 
 namespace EScooter.RentService.Application.Commands.Rents
 {
@@ -20,12 +19,12 @@ namespace EScooter.RentService.Application.Commands.Rents
         /// </summary>
         /// <param name="CustomerId">The Id of the customer performing the rent.</param>
         /// <param name="ScooterId">The Id of the scooter to be rented.</param>
-        public record Command(Guid CustomerId, Guid ScooterId) : CommandBase<Nothing>;
+        public record Command(Guid CustomerId, Guid ScooterId) : CommandBase<RentSnapshot>;
 
         /// <summary>
         /// The handler for the <see cref="RequestRent"/> command.
         /// </summary>
-        public class Handler : UnitOfWorkHandler<Command, Nothing>
+        public class Handler : UnitOfWorkHandler<Command, RentSnapshot>
         {
             private readonly IRentRepository _rentRepository;
             private readonly ITimestampProvider _timestampProvider;
@@ -46,11 +45,18 @@ namespace EScooter.RentService.Application.Commands.Rents
             }
 
             /// <inheritdoc/>
-            protected override Task<Response<Nothing>> HandleRequest(Command request)
+            protected override Task<Response<RentSnapshot>> HandleRequest(Command request)
             {
                 var rent = Rent.Create(request.ScooterId, request.CustomerId, _timestampProvider.Now);
                 _rentRepository.Save(rent);
-                return OkAsync;
+                return Task.FromResult<Response<RentSnapshot>>(new RentSnapshot(
+                    rent.Id,
+                    rent.CustomerId,
+                    rent.ScooterId,
+                    rent.RequestTimestamp,
+                    rent.ConfirmationInfo,
+                    rent.CancellationInfo,
+                    rent.StopInfo));
             }
         }
     }
