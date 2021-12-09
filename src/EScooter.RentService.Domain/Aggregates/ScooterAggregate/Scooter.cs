@@ -126,7 +126,7 @@ namespace EScooter.RentService.Domain.Aggregates.ScooterAggregate
         /// </summary>
         public void Disable() => SetEnabled(enabled: false);
 
-        private void SetEnabled(bool enabled) => IsEnabled = enabled;
+        private void SetEnabled(bool enabled) => ModifyRentability(() => IsEnabled = enabled);
 
         /// <summary>
         /// Makes this scooter enter standby mode.
@@ -138,7 +138,7 @@ namespace EScooter.RentService.Domain.Aggregates.ScooterAggregate
         /// </summary>
         public void LeaveStandby() => SetStandby(standby: false);
 
-        private void SetStandby(bool standby) => IsInStandby = standby;
+        private void SetStandby(bool standby) => ModifyRentability(() => IsInStandby = standby);
 
         /// <summary>
         /// Marks this scooter as being inside an area of service.
@@ -150,7 +150,17 @@ namespace EScooter.RentService.Domain.Aggregates.ScooterAggregate
         /// </summary>
         public void LeaveAreaOfService() => SetOutOfService(outOfService: true);
 
-        private void SetOutOfService(bool outOfService) => IsOutOfService = outOfService;
+        private void SetOutOfService(bool outOfService) => ModifyRentability(() => IsOutOfService = outOfService);
+
+        private void ModifyRentability(Action update)
+        {
+            var rentabilityBefore = IsRentable;
+            update();
+            if (rentabilityBefore != IsRentable)
+            {
+                EmitEvent(IsRentable ? new ScooterBecameRentableEvent(this) : new ScooterBecameNotRentableEvent(this));
+            }
+        }
     }
 
     /// <summary>
@@ -162,4 +172,16 @@ namespace EScooter.RentService.Domain.Aggregates.ScooterAggregate
     /// An error returned when trying to rent a scooter that is already rented by a customer.
     /// </summary>
     public record AlreadyRented : DomainError;
+
+    /// <summary>
+    /// An event emitted when a scooter becomes not rentable.
+    /// </summary>
+    /// <param name="Scooter">The scooter.</param>
+    public record ScooterBecameNotRentableEvent(Scooter Scooter) : DomainEvent;
+
+    /// <summary>
+    /// An event emitted when a scooter becomes rentable.
+    /// </summary>
+    /// <param name="Scooter">The scooter.</param>
+    public record ScooterBecameRentableEvent(Scooter Scooter) : DomainEvent;
 }

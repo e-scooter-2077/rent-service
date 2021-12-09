@@ -32,6 +32,16 @@ namespace EScooter.RentService.Domain.Aggregates.RentAggregate
         /// <summary>
         /// Indicates that a rent ended due to the battery of the scooter falling below the standby threshold.
         /// </summary>
-        BatteryLow
+        Standby,
+
+        /// <summary>
+        /// Indicates that a rent ended due to the scooter being disabled by an administrator.
+        /// </summary>
+        Disabled,
+
+        /// <summary>
+        /// Indicates that a rent ended due to the scooter becoming not rentable.
+        /// </summary>
+        NotRentable
     }
 }
