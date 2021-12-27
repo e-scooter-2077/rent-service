@@ -126,7 +126,15 @@ namespace EScooter.RentService.Domain.Aggregates.ScooterAggregate
         /// </summary>
         public void Disable() => SetEnabled(enabled: false);
 
-        private void SetEnabled(bool enabled) => ModifyRentability(() => IsEnabled = enabled);
+        private void SetEnabled(bool enabled) => ModifyRentability(() =>
+        {
+            if (IsEnabled == enabled)
+            {
+                return;
+            }
+            IsEnabled = enabled;
+            EmitEvent(enabled ? new ScooterEnabledEvent(this) : new ScooterDisabledEvent(this));
+        });
 
         /// <summary>
         /// Makes this scooter enter standby mode.
@@ -184,4 +192,16 @@ namespace EScooter.RentService.Domain.Aggregates.ScooterAggregate
     /// </summary>
     /// <param name="Scooter">The scooter.</param>
     public record ScooterBecameRentableEvent(Scooter Scooter) : DomainEvent;
+
+    /// <summary>
+    /// An event emitted when a scooter becomes enabled.
+    /// </summary>
+    /// <param name="Scooter">The scooter.</param>
+    public record ScooterEnabledEvent(Scooter Scooter) : DomainEvent;
+
+    /// <summary>
+    /// An event emitted when a scooter becomes disabled.
+    /// </summary>
+    /// <param name="Scooter">The scooter.</param>
+    public record ScooterDisabledEvent(Scooter Scooter) : DomainEvent;
 }
