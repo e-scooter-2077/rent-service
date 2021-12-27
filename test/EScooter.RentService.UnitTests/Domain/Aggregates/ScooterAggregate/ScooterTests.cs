@@ -29,6 +29,7 @@ namespace EScooter.RentService.UnitTests.Domain.Aggregates.ScooterAggregate
         [Fact]
         public void Disable_ShouldSetTheScooterAsDisabled()
         {
+            _sut.Enable();
             _sut.Disable();
 
             _sut.IsEnabled.ShouldBeFalse();
@@ -37,7 +38,6 @@ namespace EScooter.RentService.UnitTests.Domain.Aggregates.ScooterAggregate
         [Fact]
         public void Enable_ShouldSetTheScooterAsEnabled()
         {
-            _sut.Disable();
             _sut.Enable();
 
             _sut.IsEnabled.ShouldBeTrue();
@@ -78,8 +78,9 @@ namespace EScooter.RentService.UnitTests.Domain.Aggregates.ScooterAggregate
         }
 
         [Fact]
-        public void Rent_SetTheScooterAsRented_IfTheScooterIsRentableAndAvailable()
+        public void Rent_ShouldSetTheScooterAsRented_IfTheScooterIsRentableAndAvailable()
         {
+            _sut.Enable();
             _sut.Rent(_rentId);
 
             _sut.OngoingRentId.ShouldBe(_rentId);
@@ -88,12 +89,14 @@ namespace EScooter.RentService.UnitTests.Domain.Aggregates.ScooterAggregate
         [Fact]
         public void Rent_ShouldReturnOk_IfTheScooterIsRentableAndAvailable()
         {
+            _sut.Enable();
             _sut.Rent(_rentId).ShouldBe(Ok);
         }
 
         [Fact]
         public void Rent_ShouldFail_IfTheScooterIsAlreadyRented()
         {
+            _sut.Enable();
             _sut.Rent(_rentId);
 
             _sut.Rent(Guid.NewGuid()).ShouldBe(new AlreadyRented());
