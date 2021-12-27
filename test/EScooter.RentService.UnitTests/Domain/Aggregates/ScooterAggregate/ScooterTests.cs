@@ -16,6 +16,12 @@ namespace EScooter.RentService.UnitTests.Domain.Aggregates.ScooterAggregate
             _sut = Scooter.Create(Guid.NewGuid());
         }
 
+        private void SetUpForRent()
+        {
+            _sut.Enable();
+            _sut.LeaveStandby();
+        }
+
         [Fact]
         public void Create_ShouldReturnAScooterInTheDefaultState()
         {
@@ -80,7 +86,7 @@ namespace EScooter.RentService.UnitTests.Domain.Aggregates.ScooterAggregate
         [Fact]
         public void Rent_ShouldSetTheScooterAsRented_IfTheScooterIsRentableAndAvailable()
         {
-            _sut.Enable();
+            SetUpForRent();
             _sut.Rent(_rentId);
 
             _sut.OngoingRentId.ShouldBe(_rentId);
@@ -89,14 +95,14 @@ namespace EScooter.RentService.UnitTests.Domain.Aggregates.ScooterAggregate
         [Fact]
         public void Rent_ShouldReturnOk_IfTheScooterIsRentableAndAvailable()
         {
-            _sut.Enable();
+            SetUpForRent();
             _sut.Rent(_rentId).ShouldBe(Ok);
         }
 
         [Fact]
         public void Rent_ShouldFail_IfTheScooterIsAlreadyRented()
         {
-            _sut.Enable();
+            SetUpForRent();
             _sut.Rent(_rentId);
 
             _sut.Rent(Guid.NewGuid()).ShouldBe(new AlreadyRented());
@@ -105,8 +111,6 @@ namespace EScooter.RentService.UnitTests.Domain.Aggregates.ScooterAggregate
         [Fact]
         public void Rent_ShouldFail_IfTheScooterIsDisabled()
         {
-            _sut.Disable();
-
             _sut.Rent(_rentId).ShouldBe(new NotRentable());
         }
 
@@ -121,14 +125,13 @@ namespace EScooter.RentService.UnitTests.Domain.Aggregates.ScooterAggregate
         [Fact]
         public void Rent_ShouldFail_IfTheScooterIsInStandby()
         {
-            _sut.EnterStandby();
-
             _sut.Rent(_rentId).ShouldBe(new NotRentable());
         }
 
         [Fact]
         public void ClearRent_ShouldMakeTheScooterAvailable()
         {
+            SetUpForRent();
             _sut.Rent(_rentId);
 
             _sut.ClearRent();
