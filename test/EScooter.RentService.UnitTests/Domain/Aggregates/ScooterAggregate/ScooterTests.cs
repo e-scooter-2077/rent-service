@@ -22,7 +22,7 @@ namespace EScooter.RentService.UnitTests.Domain.Aggregates.ScooterAggregate
             _sut.ShouldSatisfyAllConditions(
                 scooter => scooter.OngoingRentId.ShouldBeEmpty(),
                 scooter => scooter.IsEnabled.ShouldBeFalse(),
-                scooter => scooter.IsInStandby.ShouldBeFalse(),
+                scooter => scooter.IsInStandby.ShouldBeTrue(),
                 scooter => scooter.IsOutOfService.ShouldBeFalse());
         }
 
@@ -46,6 +46,7 @@ namespace EScooter.RentService.UnitTests.Domain.Aggregates.ScooterAggregate
         [Fact]
         public void EnterStandby_ShouldSetTheScooterInStandbyMode()
         {
+            _sut.LeaveStandby();
             _sut.EnterStandby();
 
             _sut.IsInStandby.ShouldBeTrue();
@@ -54,7 +55,6 @@ namespace EScooter.RentService.UnitTests.Domain.Aggregates.ScooterAggregate
         [Fact]
         public void LeaveStandby_ShouldSetTheScooterToNotBeInStandbyMode()
         {
-            _sut.EnterStandby();
             _sut.LeaveStandby();
 
             _sut.IsInStandby.ShouldBeFalse();
