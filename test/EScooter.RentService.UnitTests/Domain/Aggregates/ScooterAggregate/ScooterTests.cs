@@ -21,7 +21,7 @@ namespace EScooter.RentService.UnitTests.Domain.Aggregates.ScooterAggregate
         {
             _sut.ShouldSatisfyAllConditions(
                 scooter => scooter.OngoingRentId.ShouldBeEmpty(),
-                scooter => scooter.IsEnabled.ShouldBeTrue(),
+                scooter => scooter.IsEnabled.ShouldBeFalse(),
                 scooter => scooter.IsInStandby.ShouldBeFalse(),
                 scooter => scooter.IsOutOfService.ShouldBeFalse());
         }

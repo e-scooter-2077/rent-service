@@ -83,7 +83,7 @@ namespace EScooter.RentService.Domain.Aggregates.ScooterAggregate
             return new(
                 id: id,
                 ongoingRentId: None,
-                isEnabled: true,
+                isEnabled: false,
                 isInStandby: false,
                 isOutOfService: false);
         }
