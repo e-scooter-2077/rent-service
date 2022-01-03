@@ -8,10 +8,11 @@ using EasyDesk.Tools;
 using EScooter.RentService.Domain.Aggregates.ScooterAggregate;
 using System;
 using System.Threading.Tasks;
+using static EasyDesk.CleanArchitecture.Application.Responses.ResponseImports;
 
 namespace EScooter.RentService.Application.ExternalEventHandlers.ScooterLifecycle
 {
-    public record ScooterStatusChanged(Guid Id, bool Standby) : ExternalEvent;
+    public record ScooterStatusChanged(Guid Id, bool? Standby) : ExternalEvent;
 
     public class RecordScooterStatusUpdates : ExternalEventHandlerBase<ScooterStatusChanged>
     {
@@ -24,10 +25,14 @@ namespace EScooter.RentService.Application.ExternalEventHandlers.ScooterLifecycl
 
         protected override async Task<Response<Nothing>> Handle(ScooterStatusChanged ev)
         {
+            if (ev.Standby is null)
+            {
+                return Ok;
+            }
             return await _scooterRepository.GetById(ev.Id)
                 .ThenIfSuccess(scooter =>
                 {
-                    if (ev.Standby)
+                    if (ev.Standby is true)
                     {
                         scooter.EnterStandby();
                     }
