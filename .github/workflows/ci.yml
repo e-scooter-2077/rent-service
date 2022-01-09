@@ -19,7 +19,7 @@ jobs:
       MAIN_PROJECT: src/EScooter.RentService.Web
       UNIT_TESTS_PROJECT: test/EScooter.RentService.UnitTests
       OUTPUT_DIR: out
-      DOTNET_VERSION: 5.x
+      DOTNET_VERSION: 6.x
     outputs:
       version: ${{ steps.semver.outputs.version }}
       should-release: ${{ steps.semver.outputs.should-release }}
