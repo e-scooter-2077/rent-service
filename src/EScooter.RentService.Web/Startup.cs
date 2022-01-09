@@ -1,6 +1,15 @@
-using EasyDesk.CleanArchitecture.Web;
+using EasyDesk.CleanArchitecture.Application.Data.DependencyInjection;
+using EasyDesk.CleanArchitecture.Application.Events.DependencyInjection;
+using EasyDesk.CleanArchitecture.Dal.EfCore.DependencyInjection;
+using EasyDesk.CleanArchitecture.Infrastructure.Events.ServiceBus;
+using EasyDesk.CleanArchitecture.Web.Startup;
+using EScooter.RentService.Application;
+using EScooter.RentService.Infrastructure;
+using EScooter.RentService.Infrastructure.DataAccess;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
+using System;
 
 namespace EScooter.RentService.Web;
 
@@ -18,12 +27,25 @@ public class Startup : BaseStartup
     {
     }
 
-    /// <inheritdoc/>
-    protected override bool UseAuthentication => false;
+    protected override Type ApplicationAssemblyMarker => typeof(ApplicationMarker);
 
-    /// <inheritdoc/>
-    protected override bool UseAuthorization => false;
+    protected override Type InfrastructureAssemblyMarker => typeof(InfrastructureMarker);
 
-    /// <inheritdoc/>
-    protected override bool UseSwagger => true;
+    protected override Type WebAssemblyMarker => typeof(Startup);
+
+    protected override string ServiceName => "Rent";
+
+    protected override bool UsesPublisher => true;
+
+    protected override bool UsesConsumer => true;
+
+    protected override bool IsMultitenant => false;
+
+    protected override bool UsesSwagger => true;
+
+    protected override IEventBusImplementation EventBusImplementation =>
+        new AzureServiceBus(Configuration, prefix: Environment.EnvironmentName);
+
+    protected override IDataAccessImplementation DataAccessImplementation =>
+        new EfCoreDataAccess<RentDbContext>(Configuration, applyMigrations: Environment.IsDevelopment());
 }

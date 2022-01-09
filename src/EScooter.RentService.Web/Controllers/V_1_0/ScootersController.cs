@@ -40,8 +40,8 @@ public class ScootersController : AbstractMediatrController
             available.AsOption(),
             Mapper.Map<Pagination>(pagination));
         return await Query(query)
-            .ReturnOk()
-            .MapToMany<GetScooters.ScooterSnapshot, ScooterDto>();
+            .Paging(Mapper.Map<ScooterDto>)
+            .ReturnOk();
     }
 
     [HttpPost("scooters/{scooterId}/enable")]
@@ -49,8 +49,7 @@ public class ScootersController : AbstractMediatrController
     {
         var command = new EnableScooter.Command(scooterId);
         return await Command(command)
-            .ReturnOk()
-            .MapEmpty();
+            .ReturnOk();
     }
 
     [HttpPost("scooters/{scooterId}/disable")]
@@ -58,7 +57,6 @@ public class ScootersController : AbstractMediatrController
     {
         var command = new DisableScooter.Command(scooterId);
         return await Command(command)
-            .ReturnOk()
-            .MapEmpty();
+            .ReturnOk();
     }
 }

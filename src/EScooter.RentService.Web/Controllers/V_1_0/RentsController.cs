@@ -1,5 +1,7 @@
-﻿using EasyDesk.CleanArchitecture.Application.Mapping;
+﻿using EasyDesk.CleanArchitecture.Application.ErrorManagement;
+using EasyDesk.CleanArchitecture.Application.Mapping;
 using EasyDesk.CleanArchitecture.Application.Pages;
+using EasyDesk.CleanArchitecture.Domain.Model.Errors;
 using EasyDesk.CleanArchitecture.Web.Controllers;
 using EasyDesk.CleanArchitecture.Web.Dto;
 using EasyDesk.Tools.Options;
@@ -52,8 +54,8 @@ public class RentsController : AbstractMediatrController
             scooterId.AsOption(),
             Mapper.Map<Pagination>(pagination));
         return await Query(query)
-            .ReturnOk()
-            .MapToMany<RentSnapshot, RentDto>();
+            .Paging(Mapper.Map<RentDto>)
+            .ReturnOk();
     }
 
     [HttpGet("rents/{rentId}")]
@@ -61,8 +63,8 @@ public class RentsController : AbstractMediatrController
     {
         var query = new GetRent.Query(rentId);
         return await Query(query)
-            .ReturnOk()
-            .MapTo<RentSnapshot, RentDto>();
+            .MappingContent(Mapper.Map<RentDto>)
+            .ReturnOk();
     }
 
     [HttpPost("rents")]
@@ -70,8 +72,8 @@ public class RentsController : AbstractMediatrController
     {
         var command = new RequestRent.Command(body.CustomerId, body.ScooterId);
         return await Command(command)
-            .ReturnOk()
-            .MapTo<RentSnapshot, RentDto>();
+            .MappingContent(Mapper.Map<RentDto>)
+            .ReturnCreatedAtAction(nameof(GetRent), x => new { x.Id });
     }
 
     [HttpPost("rents/{rentId}/stop")]
@@ -79,7 +81,7 @@ public class RentsController : AbstractMediatrController
     {
         var command = new StopRent.Command(rentId);
         return await Command(command)
-            .ReturnOk()
-            .MapEmpty();
+            .OnFailure(e => e is DomainErrorWrapper(AggregateNotFound("Rent")), (body, _) => NotFound(body))
+            .ReturnOk();
     }
 }

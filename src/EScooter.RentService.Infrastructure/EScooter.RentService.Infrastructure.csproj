@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <PackageReference Include="EasyDesk.CleanArchitecture.Infrastructure" Version="0.24.0" />
-    <PackageReference Include="EasyDesk.CleanArchitecture.Dal.EfCore" Version="0.24.0" />
+    <PackageReference Include="EasyDesk.CleanArchitecture.Infrastructure" Version="0.27.1" />
+    <PackageReference Include="EasyDesk.CleanArchitecture.Dal.EfCore" Version="0.27.1" />
   </ItemGroup>
 
   <ItemGroup>

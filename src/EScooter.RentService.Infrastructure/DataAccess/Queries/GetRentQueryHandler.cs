@@ -4,7 +4,7 @@ using EasyDesk.CleanArchitecture.Application.ErrorManagement;
 using EasyDesk.CleanArchitecture.Application.Mediator;
 using EasyDesk.CleanArchitecture.Application.Responses;
 using EasyDesk.CleanArchitecture.Dal.EfCore.Utils;
-using EasyDesk.Tools;
+using EasyDesk.Tools.Options;
 using EScooter.RentService.Application.Queries;
 using System.Linq;
 using System.Threading.Tasks;
@@ -29,6 +29,6 @@ public class GetRentQueryHandler : RequestHandlerBase<Query, RentSnapshot>
             .Where(r => r.Id == request.RentId)
             .ProjectTo<RentSnapshot>(_mapper.ConfigurationProvider)
             .FirstOptionAsync()
-            .Map(x => x.OrElseNotFound());
+            .ThenOrElseError(Errors.NotFound);
     }
 }
