@@ -10,26 +10,25 @@ using System.Linq;
 using System.Threading.Tasks;
 using static EScooter.RentService.Application.Queries.GetRent;
 
-namespace EScooter.RentService.Infrastructure.DataAccess.Queries
+namespace EScooter.RentService.Infrastructure.DataAccess.Queries;
+
+public class GetRentQueryHandler : RequestHandlerBase<Query, RentSnapshot>
 {
-    public class GetRentQueryHandler : RequestHandlerBase<Query, RentSnapshot>
+    private readonly RentDbContext _rentDbContext;
+    private readonly IMapper _mapper;
+
+    public GetRentQueryHandler(RentDbContext rentDbContext, IMapper mapper)
     {
-        private readonly RentDbContext _rentDbContext;
-        private readonly IMapper _mapper;
+        _rentDbContext = rentDbContext;
+        _mapper = mapper;
+    }
 
-        public GetRentQueryHandler(RentDbContext rentDbContext, IMapper mapper)
-        {
-            _rentDbContext = rentDbContext;
-            _mapper = mapper;
-        }
-
-        protected override async Task<Response<RentSnapshot>> Handle(Query request)
-        {
-            return await _rentDbContext.Rents
-                .Where(r => r.Id == request.RentId)
-                .ProjectTo<RentSnapshot>(_mapper.ConfigurationProvider)
-                .FirstOptionAsync()
-                .Map(x => x.OrElseNotFound());
-        }
+    protected override async Task<Response<RentSnapshot>> Handle(Query request)
+    {
+        return await _rentDbContext.Rents
+            .Where(r => r.Id == request.RentId)
+            .ProjectTo<RentSnapshot>(_mapper.ConfigurationProvider)
+            .FirstOptionAsync()
+            .Map(x => x.OrElseNotFound());
     }
 }

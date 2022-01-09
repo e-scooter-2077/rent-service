@@ -8,25 +8,24 @@ using EScooter.RentService.Domain.Aggregates.CustomerAggregate;
 using EScooter.RentService.Domain.Aggregates.RentAggregate;
 using System.Threading.Tasks;
 
-namespace EScooter.RentService.Application.DomainEventHandlers
+namespace EScooter.RentService.Application.DomainEventHandlers;
+
+public class StartRentForCustomerWhenRentIsRequested : DomainEventHandlerBase<RentRequestedEvent>
 {
-    public class StartRentForCustomerWhenRentIsRequested : DomainEventHandlerBase<RentRequestedEvent>
+    private readonly ICustomerRepository _customerRepository;
+
+    public StartRentForCustomerWhenRentIsRequested(
+        ICustomerRepository customerRepository,
+        IUnitOfWork unitOfWork) : base(unitOfWork)
     {
-        private readonly ICustomerRepository _customerRepository;
+        _customerRepository = customerRepository;
+    }
 
-        public StartRentForCustomerWhenRentIsRequested(
-            ICustomerRepository customerRepository,
-            IUnitOfWork unitOfWork) : base(unitOfWork)
-        {
-            _customerRepository = customerRepository;
-        }
-
-        protected override async Task<Response<Nothing>> Handle(RentRequestedEvent ev)
-        {
-            return await _customerRepository.GetById(ev.Rent.CustomerId)
-                .ThenIfSuccess(customer => customer.StartRent(ev.Rent.Id))
-                .ThenIfSuccess(_customerRepository.Save)
-                .ThenToResponse();
-        }
+    protected override async Task<Response<Nothing>> Handle(RentRequestedEvent ev)
+    {
+        return await _customerRepository.GetById(ev.Rent.CustomerId)
+            .ThenIfSuccess(customer => customer.StartRent(ev.Rent.Id))
+            .ThenIfSuccess(_customerRepository.Save)
+            .ThenToResponse();
     }
 }

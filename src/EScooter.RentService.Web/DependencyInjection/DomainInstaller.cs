@@ -7,19 +7,18 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace EScooter.RentService.Web.DependencyInjection
+namespace EScooter.RentService.Web.DependencyInjection;
+
+/// <summary>
+/// An installer containing dependency injection configuration for the domain layer.
+/// </summary>
+public class DomainInstaller : IServiceInstaller
 {
-    /// <summary>
-    /// An installer containing dependency injection configuration for the domain layer.
-    /// </summary>
-    public class DomainInstaller : IServiceInstaller
+    /// <inheritdoc/>
+    public void InstallServices(IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
     {
-        /// <inheritdoc/>
-        public void InstallServices(IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
-        {
-            services.AddScoped<ICustomerRepository, EfCoreCustomerRepository>();
-            services.AddScoped<IScooterRepository, EfCoreScooterRepository>();
-            services.AddScoped<IRentRepository, EfCoreRentRepository>();
-        }
+        services.AddScoped<ICustomerRepository, EfCoreCustomerRepository>();
+        services.AddScoped<IScooterRepository, EfCoreScooterRepository>();
+        services.AddScoped<IRentRepository, EfCoreRentRepository>();
     }
 }

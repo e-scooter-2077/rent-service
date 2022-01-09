@@ -9,32 +9,31 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace EScooter.RentService.Infrastructure.DataAccess.Repositories
+namespace EScooter.RentService.Infrastructure.DataAccess.Repositories;
+
+/// <summary>
+/// An implementation for the <see cref="IRentRepository"/> service using Entity Framework Core to access the data store.
+/// </summary>
+public class EfCoreRentRepository : EfCoreRepository<Rent, RentModel, RentDbContext>, IRentRepository
 {
     /// <summary>
-    /// An implementation for the <see cref="IRentRepository"/> service using Entity Framework Core to access the data store.
+    /// Initializes a new instance of the <see cref="EfCoreRentRepository"/> class.
     /// </summary>
-    public class EfCoreRentRepository : EfCoreRepository<Rent, RentModel, RentDbContext>, IRentRepository
+    /// <param name="context">The DbContext to use.</param>
+    /// <param name="eventNotifier">The domain event notifier.</param>
+    public EfCoreRentRepository(
+        RentDbContext context,
+        IDomainEventNotifier eventNotifier)
+        : base(context, new RentConverter(), eventNotifier)
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="EfCoreRentRepository"/> class.
-        /// </summary>
-        /// <param name="context">The DbContext to use.</param>
-        /// <param name="eventNotifier">The domain event notifier.</param>
-        public EfCoreRentRepository(
-            RentDbContext context,
-            IDomainEventNotifier eventNotifier)
-            : base(context, new RentConverter(), eventNotifier)
-        {
-        }
-
-        /// <inheritdoc/>
-        protected override DbSet<RentModel> GetDbSet(RentDbContext context) => context.Rents;
-
-        /// <inheritdoc/>
-        protected override IQueryable<RentModel> Includes(IQueryable<RentModel> initialQuery) => initialQuery;
-
-        /// <inheritdoc/>
-        public Task<Result<Rent>> GetById(Guid id) => GetSingle(q => q.Where(r => r.Id == id));
     }
+
+    /// <inheritdoc/>
+    protected override DbSet<RentModel> GetDbSet(RentDbContext context) => context.Rents;
+
+    /// <inheritdoc/>
+    protected override IQueryable<RentModel> Includes(IQueryable<RentModel> initialQuery) => initialQuery;
+
+    /// <inheritdoc/>
+    public Task<Result<Rent>> GetById(Guid id) => GetSingle(q => q.Where(r => r.Id == id));
 }

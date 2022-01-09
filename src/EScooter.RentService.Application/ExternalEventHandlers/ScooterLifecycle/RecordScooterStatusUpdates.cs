@@ -10,39 +10,38 @@ using System;
 using System.Threading.Tasks;
 using static EasyDesk.CleanArchitecture.Application.Responses.ResponseImports;
 
-namespace EScooter.RentService.Application.ExternalEventHandlers.ScooterLifecycle
+namespace EScooter.RentService.Application.ExternalEventHandlers.ScooterLifecycle;
+
+public record ScooterStatusChanged(Guid Id, bool? Standby) : ExternalEvent;
+
+public class RecordScooterStatusUpdates : ExternalEventHandlerBase<ScooterStatusChanged>
 {
-    public record ScooterStatusChanged(Guid Id, bool? Standby) : ExternalEvent;
+    private readonly IScooterRepository _scooterRepository;
 
-    public class RecordScooterStatusUpdates : ExternalEventHandlerBase<ScooterStatusChanged>
+    public RecordScooterStatusUpdates(IScooterRepository scooterRepository, IUnitOfWork unitOfWork) : base(unitOfWork)
     {
-        private readonly IScooterRepository _scooterRepository;
+        _scooterRepository = scooterRepository;
+    }
 
-        public RecordScooterStatusUpdates(IScooterRepository scooterRepository, IUnitOfWork unitOfWork) : base(unitOfWork)
+    protected override async Task<Response<Nothing>> Handle(ScooterStatusChanged ev)
+    {
+        if (ev.Standby is null)
         {
-            _scooterRepository = scooterRepository;
+            return Ok;
         }
-
-        protected override async Task<Response<Nothing>> Handle(ScooterStatusChanged ev)
-        {
-            if (ev.Standby is null)
+        return await _scooterRepository.GetById(ev.Id)
+            .ThenIfSuccess(scooter =>
             {
-                return Ok;
-            }
-            return await _scooterRepository.GetById(ev.Id)
-                .ThenIfSuccess(scooter =>
+                if (ev.Standby is true)
                 {
-                    if (ev.Standby is true)
-                    {
-                        scooter.EnterStandby();
-                    }
-                    else
-                    {
-                        scooter.LeaveStandby();
-                    }
-                })
-                .ThenIfSuccess(_scooterRepository.Save)
-                .ThenToResponse();
-        }
+                    scooter.EnterStandby();
+                }
+                else
+                {
+                    scooter.LeaveStandby();
+                }
+            })
+            .ThenIfSuccess(_scooterRepository.Save)
+            .ThenToResponse();
     }
 }

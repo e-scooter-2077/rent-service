@@ -1,10 +1,9 @@
-﻿namespace EScooter.RentService.Domain.Aggregates.RentAggregate
+﻿namespace EScooter.RentService.Domain.Aggregates.RentAggregate;
+
+public enum RentState
 {
-    public enum RentState
-    {
-        Pending,
-        Ongoing,
-        Cancelled,
-        Completed
-    }
+    Pending,
+    Ongoing,
+    Cancelled,
+    Completed
 }

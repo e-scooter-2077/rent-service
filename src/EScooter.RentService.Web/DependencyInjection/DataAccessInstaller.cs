@@ -6,19 +6,18 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace EScooter.RentService.Web.DependencyInjection
+namespace EScooter.RentService.Web.DependencyInjection;
+
+public class DataAccessInstaller : IServiceInstaller
 {
-    public class DataAccessInstaller : IServiceInstaller
+    public void InstallServices(IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
     {
-        public void InstallServices(IServiceCollection services, IConfiguration configuration, IWebHostEnvironment environment)
+        services.AddEfCoreDataAccess(configuration.GetConnectionString("MainDb"), options =>
         {
-            services.AddEfCoreDataAccess(configuration.GetConnectionString("MainDb"), options =>
-            {
-                options
-                    .AddEntities<RentDbContext>()
-                    .AddOutbox()
-                    .AddIdemptenceManager();
-            });
-        }
+            options
+                .AddEntities<RentDbContext>()
+                .AddOutbox()
+                .AddIdemptenceManager();
+        });
     }
 }
