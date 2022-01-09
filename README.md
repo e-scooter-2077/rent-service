@@ -1,11 +1,6 @@
-# easydesk-microservice-template
-Template project for a .NET C# microservice based on the Clean Architecture and the EasyDesk frameworks.
-
-## Usage
-1. Click on "Use this template" and then configure it from GitHub.
-2. Clone the repo and run the `rename_all.sh` script passing the name of the microservice (conform to the C# namespace conventions)
-3. Commit all the changes
-4. Open the solution with Visual Studio and start coding
-
-### Example
-You can look at the [Hello World Service](https://github.com/EasyDesk/easydesk-hello-world-service).
+# Rent Service
+[![Continuous Integration](https://github.com/e-scooter-2077/rent-service/actions/workflows/ci.yml/badge.svg?event=push)](https://github.com/e-scooter-2077/rent-service/actions/workflows/ci.yml)
+[![GitHub issues](https://img.shields.io/github/issues-raw/e-scooter-2077/rent-service?style=plastic)](https://github.com/e-scooter-2077/rent-service/issues)
+[![GitHub pull requests](https://img.shields.io/github/issues-pr-raw/e-scooter-2077/rent-service?style=plastic)](https://github.com/e-scooter-2077/rent-service/pulls)
+[![GitHub](https://img.shields.io/github/license/e-scooter-2077/rent-service?style=plastic)](/LICENSE)
+[![GitHub release (latest SemVer including pre-releases)](https://img.shields.io/github/v/release/e-scooter-2077/rent-service?include_prereleases&style=plastic)](https://github.com/e-scooter-2077/rent-service/releases)
