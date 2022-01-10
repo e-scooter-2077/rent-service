@@ -1,8 +1,5 @@
 name: Continuous Integration
 
-env:
-  AZURE_APP_SERVICE_NAME: escooter-rent-service
-
 on:
   workflow_dispatch:
   push:
@@ -67,7 +64,7 @@ jobs:
     needs: [release]
     with:
       artifact-name: build-artifacts
-      app-name: ${{ inputs.app-service-name }}
+      app-name: escooter-rent-service
       publish-dir: app
       slot-name: production
       migrations-script: update-database.sql
