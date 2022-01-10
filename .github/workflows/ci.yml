@@ -40,7 +40,7 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           name: build-artifacts
-          path: out
+          path: ${{ env.OUTPUT_DIR }}
   release:
     name: GitHub Release
     runs-on: ubuntu-20.04
@@ -62,22 +62,16 @@ jobs:
             update-database.sql
             assets.zip
   deploy:
-    name: Deploy to Producion environment
-    runs-on: windows-2019
-    needs: [build, release]
-    concurrency: deploy-production
-    environment: production
-    steps:
-      - uses: actions/download-artifact@v2
-        with:
-          name: build-artifacts
-      - name: Deploy to Azure
-        uses: EasyDesk/job-azure-publish-webapp@v1
-        with:
-          azure-credentials: ${{ secrets.AZURE_CREDENTIALS }}
-          app-name: ${{ env.AZURE_APP_SERVICE_NAME }}
-          publish-dir: app
-          slot-name: production
-          migrations-script: update-database.sql
-          db-server-name: ${{ secrets.DB_SERVER }}
-          db-connection-string: ${{ secrets.DB_CONNECTION_STRING }}
+    uses: EasyDesk/azure-deploy-microservice/.github/workflows/azure-deploy-microservice.yml@v0
+    name: Deploy to Production environment
+    needs: [release]
+    with:
+      artifact-name: build-artifacts
+      app-name: ${{ inputs.app-service-name }}
+      publish-dir: app
+      slot-name: production
+      migrations-script: update-database.sql
+    secrets:
+      azure-credentials: ${{ secrets.azure-credentials }}
+      db-server-name: ${{ secrets.prod-db-server }}
+      db-connection-string: ${{ secrets.prod-connection-string }}
