@@ -9,66 +9,28 @@ on:
       - "*"
 
 jobs:
-  build:
-    name: Build Microservice
-    runs-on: ubuntu-20.04
-    env:
-      MAIN_PROJECT: src/EScooter.RentService.Web
-      UNIT_TESTS_PROJECT: test/EScooter.RentService.UnitTests
-      OUTPUT_DIR: out
-      DOTNET_VERSION: 6.x
-    outputs:
-      version: ${{ steps.semver.outputs.version }}
-      should-release: ${{ steps.semver.outputs.should-release }}
-      is-prerelease: ${{ steps.semver.outputs.is-github-prerelease }}
-    steps:
-      - id: semver
-        name: Checkout
-        uses: EasyDesk/action-semver-checkout@v1
-      - name: Build
-        uses: EasyDesk/job-microservice-build@v1
-        with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
-          main-project: ${{ env.MAIN_PROJECT }}
-          unit-tests-project: ${{ env.UNIT_TESTS_PROJECT }}
-          output-dir: ${{ env.OUTPUT_DIR }}/app
-          sql-file-name: ${{ env.OUTPUT_DIR }}/update-database.sql
-          warnings-as-errors: true
-      - uses: actions/upload-artifact@v2
-        with:
-          name: build-artifacts
-          path: ${{ env.OUTPUT_DIR }}
-  release:
-    name: GitHub Release
-    runs-on: ubuntu-20.04
-    needs: [build]
-    if: needs.build.outputs.should-release == 'true'
-    concurrency: release
-    steps:
-      - uses: actions/download-artifact@v2
-        with:
-          name: build-artifacts
-      - name: Zip build assets
-        run: zip -r assets app/*
-      - name: Release
-        uses: EasyDesk/action-semver-release@v1
-        with:
-          version: ${{ needs.build.outputs.version }}
-          prerelease: ${{ needs.build.outputs.is-prerelease }}
-          files: |
-            update-database.sql
-            assets.zip
+  ci-cd:
+    uses: EasyDesk/microservice-cicd/.github/workflows/microservice-cicd.yml@v0
+    with:
+      dotnet-version: 6.x
+      warnings-as-errors: true
+      main-project-name: src/EScooter.RentService.Web
+      unit-test-project-name: test/EScooter.RentService.UnitTests
+      app-publish-dir: app
+      sql-script-name: update-database.sql
+      artifact-name: build-artifacts
+      release-prefix: EScooter.RentService
   deploy:
     uses: EasyDesk/azure-deploy-microservice/.github/workflows/azure-deploy-microservice.yml@v0
     name: Deploy to Production environment
-    needs: [release]
+    needs: [ci-cd]
+    if: needs.ci-cd.outputs.released == 'true'
     with:
       artifact-name: build-artifacts
       app-name: escooter-rent-service
       publish-dir: app
-      slot-name: production
       migrations-script: update-database.sql
     secrets:
-      azure-credentials: ${{ secrets.azure-credentials }}
-      db-server-name: ${{ secrets.prod-db-server }}
-      db-connection-string: ${{ secrets.prod-connection-string }}
+      azure-credentials: ${{ secrets.AZURE_CREDENTIALS }}
+      db-server-name: ${{ secrets.DB_SERVER }}
+      db-connection-string: ${{ secrets.DB_CONNECTION_STRING }}
