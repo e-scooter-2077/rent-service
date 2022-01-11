@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
-    <PackageReference Include="EasyDesk.CleanArchitecture.Application" Version="0.27.1" />
+    <PackageReference Include="EasyDesk.CleanArchitecture.Application" Version="0.28.0" />
   </ItemGroup>
 
   <ItemGroup>

@@ -4,12 +4,12 @@
     "net6.0": {
       "EasyDesk.CleanArchitecture.Application": {
         "type": "Direct",
-        "requested": "[0.27.1, )",
-        "resolved": "0.27.1",
-        "contentHash": "hdvcCXZCw2aLN5XXpVmbU8MKdLABlN8F7+nnXBppABrG54pNqv/jdnl4H/ny5r6aDjxkQuxyLkIBVDKNirSs8A==",
+        "requested": "[0.28.0, )",
+        "resolved": "0.28.0",
+        "contentHash": "cSM2fgau3osZypIJ60rz3UD0H8Phqh/WoauanYoQ9XJSApIyf6NWjGvNhxbwrSZAceJUgYAwGPQhNaaQJjNU3A==",
         "dependencies": {
           "AutoMapper": "10.1.1",
-          "EasyDesk.CleanArchitecture.Domain": "0.27.1",
+          "EasyDesk.CleanArchitecture.Domain": "0.28.0",
           "EasyDesk.Tools": "3.0.0",
           "FluentValidation": "10.3.6",
           "MediatR": "9.0.0",
@@ -38,8 +38,8 @@
       },
       "EasyDesk.CleanArchitecture.Domain": {
         "type": "Transitive",
-        "resolved": "0.27.1",
-        "contentHash": "1u5q6D7KlhpLR5WgQgAJftCfrN9RggptBGc0Cqr3kS6EGFTk8uyJqQ//+/Kk5eYuxbONtDY01eza4QXu7kk9Hg==",
+        "resolved": "0.28.0",
+        "contentHash": "Gy6+xXYCcWa6QjzLBjI5wqizEtNkHvcI5FHaFAOfr1tnPvqYGA9Ac11768yLvPKb4ROrhW+z9auVI8E3KP5PSQ==",
         "dependencies": {
           "EasyDesk.Tools": "3.0.0"
         }
@@ -148,7 +148,7 @@
       "escooter.rentservice.domain": {
         "type": "Project",
         "dependencies": {
-          "EasyDesk.CleanArchitecture.Domain": "0.27.1"
+          "EasyDesk.CleanArchitecture.Domain": "0.28.0"
         }
       }
     }
