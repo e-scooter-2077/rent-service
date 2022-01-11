@@ -21,7 +21,7 @@ jobs:
       artifact-name: build-artifacts
       release-prefix: EScooter.RentService
   deploy:
-    uses: EasyDesk/azure-deploy-microservice/.github/workflows/azure-deploy-microservice.yml@v0
+    uses: EasyDesk/microservice-azure-deploy/.github/workflows/microservice-azure-deploy.yml@v0
     name: Deploy to Production environment
     needs: [ci-cd]
     if: needs.ci-cd.outputs.released == 'true'
