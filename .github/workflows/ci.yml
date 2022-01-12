@@ -27,6 +27,7 @@ jobs:
     if: needs.ci-cd.outputs.released == 'true'
     with:
       artifact-name: build-artifacts
+      resource-group: e-scooter
       app-name: escooter-rent-service
       publish-dir: app
       migrations-script: update-database.sql
