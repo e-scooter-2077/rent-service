@@ -73,7 +73,7 @@ public class RentsController : AbstractMediatrController
         var command = new RequestRent.Command(body.CustomerId, body.ScooterId);
         return await Command(command)
             .MappingContent(Mapper.Map<RentDto>)
-            .ReturnCreatedAtAction(nameof(GetRent), x => new { x.Id });
+            .ReturnCreatedAtAction(nameof(GetRent), x => new { RentId = x.Id });
     }
 
     [HttpPost("rents/{rentId}/stop")]
