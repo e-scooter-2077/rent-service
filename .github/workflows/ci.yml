@@ -27,8 +27,8 @@ jobs:
     if: needs.ci-cd.outputs.released == 'true'
     with:
       artifact-name: build-artifacts
-      resource-group: e-scooter
-      app-name: escooter-rent-service
+      resource-group: escooter-smart-city
+      app-name: escooter-rent-microservice
       publish-dir: app
       migrations-script: update-database.sql
     secrets:
